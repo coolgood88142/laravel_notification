@@ -22,23 +22,25 @@ class ArticlesController extends Controller
     {   
         $id = Auth::id();
         $user = \App\User::where('id', '=', $id)->first();
-        // dd($user->notifications);
-        // $tests = Notifications::all();
-        // foreach($user->notifications as $test){
-        //     dd($test->unread());
-        // }
-        // dd(Notifications::all());
-        $articles = Articles::orderBy('id')->get();
+        $notifications = $user->notifications;
         $datetime = Carbon::now()->setTimezone('Asia/Taipei')->toDateTimeString();
-        // $time1 = strtotime($datetime);
-        // $time2 = strtotime('2021-07-29 04:51:53');
-        // $test = ceil(($time2-$time1)/86400) < 3 ? true : false;
-        // dd($user->notifications->where("DATEDIFF('2021-07-25 13:14:17', created_at)  < 3"));
-        // dd($user->notifications->where("id", "=", "5d09f353-d749-4dfd-a6ae-114004e63811"));
-        dd($user->notifications->where("DATEDIFF('2021-07-25 13:14:17', created_at)  < 3"));
+        $notificationsArray = [];
+        foreach($user->notifications as $notification){
+            $array = [ 
+                'id' => $notification->id,
+                'title' => $notification->data['title'],
+                'status' => $notification->data['status'],
+                'articlesId' => $notification->data['articlesId'],
+                'read' => $notification->read(),
+                'notThreeDay' => ceil((strtotime($notification->created_at) - strtotime($datetime))/86400) < 3
+            ];
+            array_push($notificationsArray, $array);
+        }
+        $articles = Articles::orderBy('id')->get();
+    
         $data = [
-            'notifications' => $user->notifications,
-            'notificationsCount' => count($user->notifications),
+            'notifications' => $notificationsArray,
+            'notificationsCount' => count($notificationsArray),
             'articles' => $articles,
             'userId' => $id,
             'datetime' => $datetime,
@@ -129,6 +131,7 @@ class ArticlesController extends Controller
         $userId = $request->userId;
         $notificationId = $request->notificationId;
         $isAdd = $request->isAdd;
+        $isRead = $request->isRead;
         $articles = Articles::where('id', '=', $id)->first();
         $user = User::where('id', '=', $articles->author_id)->first();
         $comment =  DB::table('users')
@@ -139,7 +142,7 @@ class ArticlesController extends Controller
             ])
             ->get();
 
-        if($notificationId != null && $userId != null){
+        if($notificationId != null && $userId != null && $isRead == 'N'){
             //點選後直接做已閱讀
             $this->readNotifications($notificationId, $userId);
         }

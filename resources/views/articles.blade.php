@@ -84,23 +84,23 @@
                                             onCLick="readArticles(this, '')" />
 								</div>
 								@foreach ($notifications as $key => $notification)
-                                    @if(ceil((strtotime($notification->created_at) - strtotime($datetime))/86400) < 3)
+                                    @if($notification['notThreeDay'])
                                         <div class="row" style="{{ $key < 10 ? '' : 'display:none;' }}" name="notification">
                                             <div class="col-8">
-                                                <input type="button" class="list-group-item list-group-item-action" value="您有一篇新訊息【{{ $notification->data['title'] }}】" 
-                                                    @if ($notification->data['status'] != 'delete')
-                                                        onclick="window.location.href='/showArticleContent?id={{ $notification->data['articlesId'] }}&notificationId={{ $notification->id }}&userId={{ $userId }}&isAdd=N'"
+                                                <input type="button" class="list-group-item list-group-item-action" value="您有一篇新訊息【{{ $notification['title'] }}】" 
+                                                    @if ($notification['status'] != 'delete')
+                                                        onclick="window.location.href='/showArticleContent?id={{ $notification['articlesId'] }}&notificationId={{ $notification['id'] }}&userId={{ $userId }}&isRead={{ $notification['read'] ? 'Y' : 'N' }}&isAdd=N'"
                                                     @endif
                                                 />
                                             </div>
                                             <div class="col-4">
                                                 <input type="button" class="btn btn-primary" name="read" value="已閱讀"
-                                                onCLick="readArticles(this, '{{ $notification->id }}')" {{ $notification->read() ? 'disabled' : '' }} />
+                                                onCLick="readArticles(this, '{{ $notification['id'] }}')" {{ $notification['read'] ? 'disabled' : '' }} />
                                             </div>
                                         </div>
                                     @endif
 								@endforeach
-                                <input type="button" class="btn btn-primary" style="margin-top: 10px; {{ $notificationsCount > 10 ? ' display:none;' : '' }}" value="更多" onClick="showNotification()">
+                                <input type="button" id="moreArticles" name="moreArticles" class="btn btn-primary" style="margin-top: 10px;" value="更多" onClick="showNotification()">
                             </div>
                             <div class="form-group">
 								<div class="card-header">
@@ -133,6 +133,12 @@
     <script src="{{mix('js/app.js')}}"></script>
 	<script src="{{mix('js/edit.js')}}"></script>
     <script>
+        $(document).ready(function() {
+            if($('#notificationsCount').val() < 10){
+                $('#moreArticles').toggle();
+            }
+        });
+
 		function readArticles(el, id){
 			$.ajax({
 				url: '/readArticles', 
