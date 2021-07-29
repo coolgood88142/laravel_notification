@@ -89,6 +89,14 @@
                                     <textarea  type="text" class="form-control" id="InputContent" name="InputContent" maxlength="500"></textarea>
                                 </div>
                                 <div class="form-group">
+                                    <label for="InputContent">上限日期</label>
+                                    <datetime format="Y:M:D" ></datetime>
+                                </div>
+                                <div class="form-group">
+                                    <input type="checkbox" class="form-check-input" id="send" value="Y">
+                                    <label class="form-check-label" for="send">發通知</label>
+                                </div>
+                                <div class="form-group">
                                     <input type="hidden" id="userId" name="userId" value="{{ $userId }}">
                                     <input type="button" class="btn btn-primary" value="儲存" onClick="addArticles()">
                                 </div>
@@ -101,6 +109,9 @@
     </div>
     <script src="{{mix('js/app.js')}}"></script>
     <script src="{{mix('js/edit.js')}}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.zh-TW.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
     <script>
         function addArticles(){
             let InputTitle = $('#InputTitle').val();

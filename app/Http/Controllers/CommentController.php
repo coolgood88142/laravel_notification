@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Events\AddArticles;
+use App\Events\AddComment;
 use App\Models\Articles;
 use App\Models\Comment;
 use App\User;
@@ -59,7 +59,7 @@ class CommentController extends Controller
             
             
             $user = User::WhereIn('id', $idArray)->get();
-            event(new AddArticles($user,  $title . '有一則新留言', $articleId, 'comment'));
+            event(new AddComment($user,  $title . '有一則新留言', $articleId));
 
             $comment = new Comment();
             $comment->user_id = $userId;
@@ -72,7 +72,7 @@ class CommentController extends Controller
             $status = 'error';
         }
 
-        return redirect()->route('editArticles',  [
+        return redirect()->route('showArticleContent',  [
             'id' => $articleId,
             'userId' => $userId,
             'isAdd' => 'Y'

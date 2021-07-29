@@ -19,6 +19,8 @@ Route::get('/', function () {
 
 Auth::routes();
 
+// Route::get('logout', '\App\Http\Controllers\Auth\LoginController@logout');
+
 Route::get('/home', 'HomeController@index')->name('home');
 
 Route::get('/city', 'CityController@getCityData');
@@ -47,4 +49,4 @@ Route::get('/showArticleContent', 'ArticlesController@showArticleContent')->name
 
 Route::get('/editComment', 'CommentController@editComment');
 
-
+Route::get('/showNotification', 'ArticlesController@showNotification');

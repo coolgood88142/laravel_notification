@@ -3,6 +3,8 @@
 namespace App\Listeners;
 
 use App\Events\AddArticles;
+use App\Events\AddComment;
+use App\Events\DeleteArticles;
 use App\Notifications\NewNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;

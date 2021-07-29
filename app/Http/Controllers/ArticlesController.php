@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Notifications\Notifiable;
 use App\Events\AddArticles;
+use App\Events\DeleteArticles;
 use App\Models\Articles;
 use App\Models\Notifications;
 use App\User;
@@ -25,7 +26,7 @@ class ArticlesController extends Controller
         $notifications = $user->notifications;
         $datetime = Carbon::now()->setTimezone('Asia/Taipei')->toDateTimeString();
         $notificationsArray = [];
-        foreach($user->notifications as $notification){
+        foreach($notifications as $notification){
             $array = [ 
                 'id' => $notification->id,
                 'title' => $notification->data['title'],
@@ -69,20 +70,18 @@ class ArticlesController extends Controller
             //設定執行時間為10分鐘
             set_time_limit(1200);
 
-            // \App\User::chunk(100, function($users)
+            // \App\User::chunk(1000, function($users)
             // {   
             //     foreach($users as $user)
             //     {
             //         $title = $this->title;
             //         $id = $this->id;
-            //         event(new AddArticles(\App\User::all(), '新文章:' . $title, $id, 'add'));
+            //         event(new AddArticles(\App\User::all(), '新文章:' . $title, $id));
             //     }
             // });
 
             foreach (\App\User::cursor() as $user) {
-                // $title = $this->title;
-                // $id = $this->id;
-                event(new AddArticles($user, '新文章:' . $title, $id, 'add'));
+                event(new AddArticles($user, '新文章:' . $title, $id));
             };
 
             
@@ -190,12 +189,20 @@ class ArticlesController extends Controller
             // $user =  User::where('id % 2', '=', $even);
             
             $user = DB::table('users')->select('select * from users where id % 2 = '. $even);
-            event(new AddArticles($user, $title, $id, 'delete'));
+            event(new DeleteArticles($user, $title, $id));
         }catch(Exception $e){
             $status = 'error';
         }
 
         return $status;
+    }
+
+    public function showNotification(){
+        $count = 24;
+        $id = Auth::id();
+        $user = \App\User::where('id', '=', $id)->first();
+        $notifications = $user->notifications->find($count);
+        return $notifications;
     }
     
     public function showAdd(Request $request)

@@ -21,6 +21,12 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\AddArticles' => [
             'App\Listeners\SendArticlesUser',
         ],
+        'App\Events\AddComment' => [
+            'App\Listeners\SendArticlesUser',
+        ],
+        'App\Events\DeleteArticles' => [
+            'App\Listeners\SendArticlesUser',
+        ],
     ];
 
     /**

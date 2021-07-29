@@ -10,7 +10,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class AddArticles
+class DeleteArticles
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -29,7 +29,7 @@ class AddArticles
         $this->user = $user;
         $this->title = $title;
         $this->articlesId = $articlesId;
-        $this->status = 'addArticle';
+        $this->status = 'deleteArticle';
     }
 
     /**

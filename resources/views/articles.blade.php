@@ -100,7 +100,7 @@
                                         </div>
                                     @endif
 								@endforeach
-                                <input type="button" id="moreArticles" name="moreArticles" class="btn btn-primary" style="margin-top: 10px;" value="更多" onClick="showNotification()">
+                                <input type="button" id="moreArticles" name="moreArticles" class="btn btn-primary" style="margin-top: 10px;" value="更多" onClick="showNotification(10)">
                             </div>
                             <div class="form-group">
 								<div class="card-header">
@@ -138,6 +138,23 @@
                 $('#moreArticles').toggle();
             }
         });
+
+        function showNotification(count){
+            $.ajax({
+				url: '/showNotification', 
+				type: 'GET',
+				data:{
+					"count" : $("div[name='notification']").length + count,
+					'_token':'{{csrf_token()}}'
+				},
+				success: function(result){
+                    console.log(result);
+				},
+				error:function(xhr, status, error){
+					alert(xhr.statusText);
+				}
+			});
+        }
 
 		function readArticles(el, id){
 			$.ajax({
@@ -185,15 +202,15 @@
 			});
 		}
 
-        function showNotification(){
-            let count = 0;
-            $("div[name='notification']").each(function(index, el){
-                if($(el).is(':hidden') && count < 10){
-                    $(el).show();
-                    count++;
-                }
-            });
-        }
+        // function showNotification(){
+        //     let count = 0;
+        //     $("div[name='notification']").each(function(index, el){
+        //         if($(el).is(':hidden') && count < 10){
+        //             $(el).show();
+        //             count++;
+        //         }
+        //     });
+        // }
 	</script>
 </body>
 
