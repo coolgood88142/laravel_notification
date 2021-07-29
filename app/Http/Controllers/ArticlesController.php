@@ -198,11 +198,10 @@ class ArticlesController extends Controller
     }
 
     public function showNotification(){
-        $count = 24;
+        $count = 14;
         $id = Auth::id();
         $user = \App\User::where('id', '=', $id)->first();
-        $notifications = $user->notifications->find($count);
-        return $notifications;
+        return $user->notifications->take($count);
     }
     
     public function showAdd(Request $request)

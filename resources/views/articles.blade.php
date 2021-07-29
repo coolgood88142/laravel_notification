@@ -83,6 +83,7 @@
                                     <input type="button" class="btn btn-primary" name="readAll" value="已閱讀全部"
                                             onCLick="readArticles(this, '')" />
 								</div>
+                                <div id="notificationRaw">
 								@foreach ($notifications as $key => $notification)
                                     @if($notification['notThreeDay'])
                                         <div class="row" style="{{ $key < 10 ? '' : 'display:none;' }}" name="notification">
@@ -100,6 +101,7 @@
                                         </div>
                                     @endif
 								@endforeach
+                                </div>
                                 <input type="button" id="moreArticles" name="moreArticles" class="btn btn-primary" style="margin-top: 10px;" value="更多" onClick="showNotification(10)">
                             </div>
                             <div class="form-group">
@@ -149,6 +151,35 @@
 				},
 				success: function(result){
                     console.log(result);
+                    $("div[name='notification']").remove();
+                    result.forEach(function(value, index, array){
+                        $('#notificationRaw').append("<div name='notification' class='row'><div class='col-8'>");
+                        $('#notificationRaw').append("<input type='button' value='您有一篇新訊息【" + value.title + "】");
+
+                            if(value['status'] != 'delete'){
+                                $('#notificationRaw').append("onclick='window.location.href='/showArticleContent?id="
+                                    + value.articlesId + "&notificationId=" + value.Id
+                                    + "&userId=" + $('#userId').val() + "&isRead=");
+                                
+                                if(value['read'] == 'true'){
+                                    $('#notificationRaw').append("Y");
+                                }else{
+                                    $('#notificationRaw').append("N");
+                                }
+
+                                $('#notificationRaw').append("&isAdd=N/>");
+
+                            }
+
+                            $('#notificationRaw').append("<div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀'");
+                            $('#notificationRaw').append(" onCLick='readArticles(this, " + value.Id + "')");
+
+                            if(value['read'] == "true"){
+                                $('#notificationRaw').append(" disabled");
+                            }
+
+                            $('#notificationRaw').append("/></div></div> ");
+                    });
 				},
 				error:function(xhr, status, error){
 					alert(xhr.statusText);
