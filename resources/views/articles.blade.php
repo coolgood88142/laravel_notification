@@ -78,6 +78,9 @@
                     <div class="card">
                         <div class="card-body">
                             <div class="form-group">
+                                <div id="showPusher">
+                                    
+                                </div>
                                 <div class="card-header">
                                     通知列表
                                     <input type="button" class="btn btn-primary" name="readAll" value="已閱讀全部"
@@ -86,11 +89,11 @@
                                 <div id="notificationRaw">
 								@foreach ($notifications as $key => $notification)
                                     @if($notification['notThreeDay'])
-                                        <div class="row" style="{{ $key < 10 ? '' : 'display:none;' }}" name="notification">
+                                        <div class="row" name="notification">
                                             <div class="col-8">
                                                 <input type="button" class="list-group-item list-group-item-action" value="您有一篇新訊息【{{ $notification['title'] }}】" 
                                                     @if ($notification['status'] != 'delete')
-                                                        onclick="window.location.href='/showArticleContent?id={{ $notification['articlesId'] }}&notificationId={{ $notification['id'] }}&userId={{ $userId }}&isRead={{ $notification['read'] ? 'Y' : 'N' }}&isAdd=N'"
+                                                        onclick="showArticleContent('{{ $notification['articlesId'] }}', '{{ $notification['id'] }}', '{{ $notification['read'] ? 'Y' : 'N' }}')"
                                                     @endif
                                                 />
                                             </div>
@@ -102,7 +105,7 @@
                                     @endif
 								@endforeach
                                 </div>
-                                <input type="button" id="moreArticles" name="moreArticles" class="btn btn-primary" style="margin-top: 10px;" value="更多" onClick="showNotification(10)">
+                                <input type="button" id="moreArticles" name="moreArticles" class="btn btn-primary" style="margin-top: 10px;" value="更多" onClick="showNotification()">
                             </div>
                             <div class="form-group">
 								<div class="card-header">
@@ -111,7 +114,7 @@
 								@foreach ($articles as $key => $article)
                                     <div class="row">
                                         <div class="col-8">
-                                            <input type="button" class="list-group-item list-group-item-action" value="{{ $article->title }}" onclick="window.location.href='/showArticleContent?id={{ $article->id }}&userId={{ $userId }}&isAdd=N'" />
+                                            <input type="button" class="list-group-item list-group-item-action" value="{{ $article->title }}" onclick="showArticleContent('{{ $article->id }}', null, null)" />
                                         </div>
                                         @if($article->author_id == $userId)
                                             <div class="col-4">
@@ -134,57 +137,89 @@
     </div>
     <script src="{{mix('js/app.js')}}"></script>
 	<script src="{{mix('js/edit.js')}}"></script>
+    <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
     <script>
         $(document).ready(function() {
-            if($('#notificationsCount').val() < 10){
-                $('#moreArticles').toggle();
-            }
+             Pusher.logToConsole = true;
+
+            var pusher = new Pusher('408cd422417d5833d90d', {
+                cluster: 'ap3',
+                encrypted: true
+            });
+
+            var channel = pusher.subscribe('article-channel');
+            channel.bind('App\\Events\\SendMessage', function(data) {
+                let userId = $('#userId').val()
+                if(userId == data.user.id){
+
+                    let message = '從pusher傳來通知：' + data.message;
+                    $('#showPusher').empty();
+                    $('#showPusher').text(message);
+                }
+            });
         });
 
-        function showNotification(count){
+        function showNotification(){
             $.ajax({
 				url: '/showNotification', 
-				type: 'GET',
+				type: 'POST',
 				data:{
-					"count" : $("div[name='notification']").length + count,
+                    'nowCount' : $("div[name='notification']").length,
+					'count' : $('#notificationsCount').val(),
 					'_token':'{{csrf_token()}}'
 				},
 				success: function(result){
-                    console.log(result);
-                    $("div[name='notification']").remove();
-                    result.forEach(function(value, index, array){
-                        $('#notificationRaw').append("<div name='notification' class='row'><div class='col-8'>");
-                        $('#notificationRaw').append("<input type='button' value='您有一篇新訊息【" + value.title + "】");
+                    
+                    
+                    $.each(result, function(index, value) {
+                        let div1 =  document.createElement("div");
+                        div1.setAttribute("name", "notification");
+                        div1.setAttribute("class", "row");
 
-                            if(value['status'] != 'delete'){
-                                $('#notificationRaw').append("onclick='window.location.href='/showArticleContent?id="
-                                    + value.articlesId + "&notificationId=" + value.Id
-                                    + "&userId=" + $('#userId').val() + "&isRead=");
-                                
-                                if(value['read'] == 'true'){
-                                    $('#notificationRaw').append("Y");
-                                }else{
-                                    $('#notificationRaw').append("N");
-                                }
-
-                                $('#notificationRaw').append("&isAdd=N/>");
-
+                        if(value.data.status != 'delete'){
+                            if(value.read_at != null){
+                                div1.innerHTML = "<div class='col-8'><input type='button' class='list-group-item list-group-item-action'"
+                                    + " value='您有一篇新訊息【" + value.data.title + "】'  onClick=showArticleContent('" + value.data.articlesId + "',"+"'" + value.id + "'," + "'Y'" + ") /></div>"
+                                    + " <div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀' onClick=readArticles(this" + ",'" + value.id + "'" + ") disabled />" + "</div></div> ";
+                            }else{
+                                div1.innerHTML = "<div class='col-8'><input type='button' class='list-group-item list-group-item-action'"
+                                    + " value='您有一篇新訊息【" + value.data.title + "】'  onClick=showArticleContent('" + value.data.articlesId + "',"+"'" + value.id + "'," + "'N'" + ") /></div>"
+                                    + " <div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀' onClick=readArticles(this" + ",'" + value.id + "'" + ") disabled />" + "</div></div> ";
                             }
-
-                            $('#notificationRaw').append("<div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀'");
-                            $('#notificationRaw').append(" onCLick='readArticles(this, " + value.Id + "')");
-
-                            if(value['read'] == "true"){
-                                $('#notificationRaw').append(" disabled");
+                        }else{
+                            if(value.read_at != null){
+                                div1.innerHTML = "<div class='col-8'><input type='button' class='list-group-item list-group-item-action'"
+                                    + " value='您有一篇新訊息【" + value.data.title + "】'  onClick=showArticleContent('" + value.data.articlesId + "',"+"'" + value.id + "'," + "'Y'" + ") /></div>"
+                                    + " <div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀' onClick=readArticles(this" + ",'" + value.id + "'" + ") />" + "</div></div> ";
+                            }else{
+                                div1.innerHTML = "<div class='col-8'><input type='button' class='list-group-item list-group-item-action'"
+                                    + " value='您有一篇新訊息【" + value.data.title + "】'  onClick=showArticleContent('" + value.data.articlesId + "',"+"'" + value.id + "'," + "'N'" + ") /></div>"
+                                    + " <div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀' onClick=readArticles(this" + ",'" + value.id + "'" + ") />" + "</div></div> ";
                             }
+                        }
 
-                            $('#notificationRaw').append("/></div></div> ");
+                        $('#notificationRaw').append(div1);
                     });
 				},
 				error:function(xhr, status, error){
 					alert(xhr.statusText);
 				}
 			});
+        }
+
+        function showArticleContent(id, notificationId, isRead){
+            let userId = $('#userId').val();
+            let url = '/showArticleContent?id='+ id +'&userId='+ userId +'&isAdd=N';
+            
+            if(notificationId != null){
+                url = url + '&notificationId=' + notificationId
+            }
+
+            if(isRead != null){
+                url = url + '&isRead=' + isRead
+            }
+
+            window.location.href = url;
         }
 
 		function readArticles(el, id){
@@ -233,15 +268,6 @@
 			});
 		}
 
-        // function showNotification(){
-        //     let count = 0;
-        //     $("div[name='notification']").each(function(index, el){
-        //         if($(el).is(':hidden') && count < 10){
-        //             $(el).show();
-        //             count++;
-        //         }
-        //     });
-        // }
 	</script>
 </body>
 

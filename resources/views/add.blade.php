@@ -89,12 +89,12 @@
                                     <textarea  type="text" class="form-control" id="InputContent" name="InputContent" maxlength="500"></textarea>
                                 </div>
                                 <div class="form-group">
-                                    <label for="InputContent">上限日期</label>
-                                    <datetime format="Y:M:D" ></datetime>
+                                    <label for="onlineDate">上限日期</label>
+                                    <input type="text" class="form-control" id="onlineDate" name="onlineDate" data-provide="datepicker">
                                 </div>
-                                <div class="form-group">
-                                    <input type="checkbox" class="form-check-input" id="send" value="Y">
-                                    <label class="form-check-label" for="send">發通知</label>
+                                <div class="form-group form-check">
+                                    <input type="checkbox" class="form-check-input" id="sendNotice" name="sendNotice" value="Y">
+                                    <label class="form-check-label" for="sendNotice">發通知</label>
                                 </div>
                                 <div class="form-group">
                                     <input type="hidden" id="userId" name="userId" value="{{ $userId }}">
@@ -109,10 +109,28 @@
     </div>
     <script src="{{mix('js/app.js')}}"></script>
     <script src="{{mix('js/edit.js')}}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.zh-TW.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
+    <link rel="stylesheet" href="./css/datepicker3.css"/>
+    <script src="https://cdn.jsdelivr.net/bootstrap.datepicker-fork/1.3.0/js/bootstrap-datepicker.js"></script>
+    <script type="text/javascript" src="./js/bootstrap-datetimepicker.zh-TW.js" charset="UTF-8"></script>
     <script>
+        $("input[name='onlineDate']").datepicker({
+            uiLibrary: 'bootstrap4',
+            format: "yyyy-mm-dd",
+            language:"zh-TW",
+            weekStart: 1,
+            daysOfWeekHighlighted: "6,0",
+            autoclose: true,
+            todayHighlight: true,
+        });
+
+        $("#sendNotice").click(function () {
+            if($(this).prop("checked")){
+                $("#sendNotice").val('Y');
+            } else {
+                $("#sendNotice").val('N');
+            }
+        });
+
         function addArticles(){
             let InputTitle = $('#InputTitle').val();
             let InputContent = $('#InputContent').val();

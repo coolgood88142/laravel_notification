@@ -13,6 +13,7 @@ use App\User;
 use App\Models\Author;
 use App\Models\Comment;
 use Carbon\Carbon;
+use Pusher\Pusher;
 use Auth;
 
 class ArticlesController extends Controller
@@ -23,7 +24,8 @@ class ArticlesController extends Controller
     {   
         $id = Auth::id();
         $user = \App\User::where('id', '=', $id)->first();
-        $notifications = $user->notifications;
+        $count = 10;
+        $notifications = $user->notifications->take($count);
         $datetime = Carbon::now()->setTimezone('Asia/Taipei')->toDateTimeString();
         $notificationsArray = [];
         foreach($notifications as $notification){
@@ -41,7 +43,7 @@ class ArticlesController extends Controller
     
         $data = [
             'notifications' => $notificationsArray,
-            'notificationsCount' => count($notificationsArray),
+            'notificationsCount' => $count,
             'articles' => $articles,
             'userId' => $id,
             'datetime' => $datetime,
@@ -58,6 +60,14 @@ class ArticlesController extends Controller
         $articles->title = $request->InputTitle;
         $articles->content = $request->InputContent;
         $articles->author_id = $request->userId;
+        $articles->online_date = $request->onlineDate;
+        $sendNotice = $request->sendNotice;
+
+        if($sendNotice == null){
+            $sendNotice = 'N';
+        }
+
+        $articles->send_notice = $sendNotice;
         $articles->save();
         $title = $articles->title;
         $id = $articles->id;
@@ -151,6 +161,8 @@ class ArticlesController extends Controller
             'articleId' => $id,
             'title' => $articles->title,
             'content' => $articles->content,
+            'onlineDate' => $articles->online_date,
+            'sendNotice' => $articles->send_notice,
             'userId' => $userId,
             'userName' => $user->name,
             'comment' => $comment,
@@ -186,10 +198,30 @@ class ArticlesController extends Controller
             $articles->delete();
             $even = $isEven ? '0' : '1';
 
+            $options = array(
+                'cluster' => 'ap3',
+                'encrypted' => true
+            );
+            
+            $pusher = new Pusher(
+                '408cd422417d5833d90d',
+                '2cb040ab9efbb676ed8b',
+                '1243356', 
+                $options
+            );
+
             // $user =  User::where('id % 2', '=', $even);
             
-            $user = DB::table('users')->select('select * from users where id % 2 = '. $even);
-            event(new DeleteArticles($user, $title, $id));
+            set_time_limit(1200);
+
+            foreach (\App\User::cursor() as $user) {
+                event(new DeleteArticles($user, $title, $id));
+
+                $data['message'] = '您有一篇新訊息【' . $title. '】';
+                $data['user'] = $user->notifications;
+                $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
+            };
+
         }catch(Exception $e){
             $status = 'error';
         }
@@ -197,12 +229,34 @@ class ArticlesController extends Controller
         return $status;
     }
 
-    public function showNotification(){
-        $count = 14;
+    public function showNotification(Request $request){
+        $nowCount = $request->nowCount;
+        $count = $request->count;
         $id = Auth::id();
         $user = \App\User::where('id', '=', $id)->first();
-        return $user->notifications->take($count);
+        $newNotification = $user->notifications->skip($nowCount)->take($count);
+        return $newNotification;
     }
+
+    public function sendNotification(){
+        $date = Carbon::now()->setTimezone('Asia/Taipei')->toDateString();
+        $articles= Articles::where('online_date', '=', $date)->get();
+        foreach($articles as $article){
+            set_time_limit(1200);
+            
+            $title = $article->title;
+            $id = $article->id;
+            $sendNotice = $article->send_notice;
+
+            if($sendNotice == 'Y'){
+                foreach (\App\User::cursor() as $user) {
+                    event(new AddArticles($user, '新文章:' . $title, $id));
+                };
+            }
+            
+        }
+        
+    } 
     
     public function showAdd(Request $request)
     {

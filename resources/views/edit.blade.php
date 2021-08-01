@@ -93,6 +93,14 @@
                                     <input  type="text" class="form-control" id="InputAuthor" name="InputAuthor" value="{{ $userName }}" readonly>
                                 </div>
                                 <div class="form-group">
+                                    <label for="onlineDate">上限日期</label>
+                                    <input type="text" class="form-control" id="onlineDate" name="onlineDate" data-provide="datepicker" value="{{ $onlineDate }}" readonly>
+                                </div>
+                                <div class="form-group form-check">
+                                    <input type="checkbox" class="form-check-input" id="sendNotice" name="sendNotice" value="{{ $sendNotice }}" disabled>
+                                    <label class="form-check-label" for="sendNotice">發通知</label>
+                                </div>
+                                <div class="form-group">
                                     <input type="hidden" id="isAdd" name="isAdd" value="{{ $isAdd }}">
                                     <input type="button" class="btn btn-primary" id="back" name="back" value="回上一頁" onClick="window.location.href='/articles'">
                                     <input type="button" class="btn btn-primary" id="showAritcles" name="showAritcles" style="display:none;" value="回文章列表" onClick="window.location.href='/articles'">
@@ -121,12 +129,37 @@
     </div>
     <script src="{{mix('js/app.js')}}"></script>
     <script src="{{mix('js/edit.js')}}"></script>
+    <link rel="stylesheet" href="./css/datepicker3.css"/>
+    <script src="https://cdn.jsdelivr.net/bootstrap.datepicker-fork/1.3.0/js/bootstrap-datepicker.js"></script>
+    <script type="text/javascript" src="./js/bootstrap-datetimepicker.zh-TW.js" charset="UTF-8"></script>
     <script>
         $( document ).ready(function() {
             let isAdd = $('#isAdd').val();
             if(isAdd == 'Y'){
                 $('#back').hide();
                 $('#showAritcles').show();
+            }
+
+            if($("#sendNotice").val() == 'Y'){
+                $("#sendNotice").prop("checked", true);
+            }
+        });
+
+        $("input[name='onlineDate']").datepicker({
+            uiLibrary: 'bootstrap4',
+            format: "yyyy-mm-dd",
+            language:"zh-TW",
+            weekStart: 1,
+            daysOfWeekHighlighted: "6,0",
+            autoclose: true,
+            todayHighlight: true,
+        });
+
+        $("#sendNotice").click(function () {
+            if($(this).prop("checked")){
+                $("#sendNotice").val('Y');
+            } else {
+                $("#sendNotice").val('N');
             }
         });
 

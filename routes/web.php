@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Events\StatuLiked;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -19,7 +21,7 @@ Route::get('/', function () {
 
 Auth::routes();
 
-// Route::get('logout', '\App\Http\Controllers\Auth\LoginController@logout');
+Route::get('/logout', 'HomeController@logout');
 
 Route::get('/home', 'HomeController@index')->name('home');
 
@@ -39,6 +41,8 @@ Route::post('/saveArticles', 'ArticlesController@saveArticles');
 
 Route::post('/addComment', 'CommentController@addComment');
 
+Route::post('/showNotification', 'ArticlesController@showNotification');
+
 Route::get('/testAdd', 'ArticlesController@testAdd');
 
 Route::get('/readArticles', 'ArticlesController@readArticles');
@@ -50,3 +54,16 @@ Route::get('/showArticleContent', 'ArticlesController@showArticleContent')->name
 Route::get('/editComment', 'CommentController@editComment');
 
 Route::get('/showNotification', 'ArticlesController@showNotification');
+
+Route::get('/sendNotification', 'ArticlesController@sendNotification');
+
+Route::get('test', function () {
+    event(new App\Events\MyEvent('hello world'));
+    return "Event has been sent!";
+});
+
+Route::get('/notification', function () {
+    return view('notification');
+});
+
+Route::get('/send', 'PusherNotificationController@notification');

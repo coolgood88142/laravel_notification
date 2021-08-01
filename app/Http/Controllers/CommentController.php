@@ -8,6 +8,8 @@ use App\Events\AddComment;
 use App\Models\Articles;
 use App\Models\Comment;
 use App\User;
+use Carbon\Carbon;
+use Pusher\Pusher;
 
 class CommentController extends Controller
 {
@@ -38,7 +40,7 @@ class CommentController extends Controller
         $userId = $request->userId;
         $articleId = $request->articleId;
         $text = $request->InputComment;
-        $title = $request->title;
+        $title = $request->title . '有一則新留言';
 
         $status = 'success';
         try{
@@ -56,16 +58,35 @@ class CommentController extends Controller
             foreach($comments as $comment){
                 array_push($idArray, $comment->user_id);
             }
+            $users = User::WhereIn('id', $idArray)->get();
+            event(new AddComment($users,  $title, $articleId));
+            foreach($users as $user){
+                dd($user->notifications);
+            }
+
             
-            
-            $user = User::WhereIn('id', $idArray)->get();
-            event(new AddComment($user,  $title . '有一則新留言', $articleId));
+            $data['message'] = '您有一篇新訊息【' . $title. '】';
+            $data['user'] = $user->notifications;
+
+            $options = array(
+                'cluster' => 'ap3',
+                'encrypted' => true
+            );
+
+            $pusher = new Pusher(
+                '408cd422417d5833d90d',
+                '2cb040ab9efbb676ed8b',
+                '1243356', 
+                $options
+            );
+
+            // $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
 
             $comment = new Comment();
             $comment->user_id = $userId;
             $comment->articles_id = $articleId;
             $comment->text = $text;
-            $comment->save();
+            // $comment->save();
 
             
         }catch(Exception $e){
