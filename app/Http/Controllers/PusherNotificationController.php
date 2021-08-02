@@ -35,9 +35,18 @@ class PusherNotificationController extends Controller
 
             if($sendNotice == 'Y'){
                 foreach (\App\User::cursor() as $user) {
+                    $notification = $user->notifications()->where('data->status', '=', 'addArticle')->first();
+                
                     $data['message'] = '您有一篇新訊息【' . $title. '】';
-					$data['user'] = $user;
-        			$pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
+                    $data['userData'] =  [
+                        'userId' => Auth::id(),
+                        'articleId' => $id,
+                        'notificationId' => $notification->id,
+                        'isRead' => 'N',
+                        'status' => 'addArticle'
+                    ];
+
+                    $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
                 };
             }
             

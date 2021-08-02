@@ -56,17 +56,13 @@ class CommentController extends Controller
 
             $comments = Comment::where('articles_id', '=', $articleId)->get();
             foreach($comments as $comment){
-                array_push($idArray, $comment->user_id);
-            }
-            $users = User::WhereIn('id', $idArray)->get();
-            event(new AddComment($users,  $title, $articleId));
-            foreach($users as $user){
-                dd($user->notifications);
+                if($comment->user_id != $userId){
+                    array_push($idArray, $comment->user_id);
+                }
             }
 
-            
-            $data['message'] = '您有一篇新訊息【' . $title. '】';
-            $data['user'] = $user->notifications;
+            $users = User::WhereIn('id', $idArray)->get();
+            event(new AddComment($users,  $title, $articleId));
 
             $options = array(
                 'cluster' => 'ap3',
@@ -80,14 +76,27 @@ class CommentController extends Controller
                 $options
             );
 
-            // $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
+            foreach($users as $user){
+                $notification = $user->notifications()->where('data->status', '=', 'addComment')->first();
+
+                $data['message'] = '您有一篇新訊息【' . $title. '】';
+                $data['userData'] = [
+                    'userId' => $user->id,
+                    'articleId' => $articleId,
+                    'notificationId' => $notification->id,
+                    'isRead' => 'N',
+                    'status' => 'addComment'
+                ];
+    
+                $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
+    
+            }
 
             $comment = new Comment();
             $comment->user_id = $userId;
             $comment->articles_id = $articleId;
             $comment->text = $text;
-            // $comment->save();
-
+            $comment->save();
             
         }catch(Exception $e){
             $status = 'error';

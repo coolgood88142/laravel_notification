@@ -78,7 +78,7 @@ class ArticlesController extends Controller
         if($title != null && $title != '' && $id != null && $id != ''){
             //執行事件傳訊息，顯示有一篇新文章
             //設定執行時間為10分鐘
-            set_time_limit(1200);
+            //set_time_limit(1200);
 
             // \App\User::chunk(1000, function($users)
             // {   
@@ -90,10 +90,19 @@ class ArticlesController extends Controller
             //     }
             // });
 
-            foreach (\App\User::cursor() as $user) {
-                event(new AddArticles($user, '新文章:' . $title, $id));
-            };
+            // foreach (\App\User::cursor() as $user) {
+            //     event(new AddArticles($user, '新文章:' . $title, $id));
+            // };
 
+            $datas = LazyCollection::make(function() {   
+                foreach (\App\User::cursor() as $user){ 
+                    yield $user;
+                }
+            });
+            
+            foreach ($datas as $data){
+                event(new AddArticles($data, '新文章:' . $title, $id));
+            }
             
         }
 
@@ -214,13 +223,25 @@ class ArticlesController extends Controller
             
             set_time_limit(1200);
 
+            $userData = [];
             foreach (\App\User::cursor() as $user) {
                 event(new DeleteArticles($user, $title, $id));
-
+                
+                $notification = $user->notifications()->where('data->status', '=', 'deleteArticle')->first();
+                
                 $data['message'] = '您有一篇新訊息【' . $title. '】';
-                $data['user'] = $user->notifications;
+                $data['userData'] =  [
+                    'userId' => Auth::id(),
+                    'articleId' => $id,
+                    'notificationId' => $notification->id,
+                    'isRead' => 'N',
+                    'status' => 'deleteArticle'
+                ];
+
                 $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
             };
+
+            
 
         }catch(Exception $e){
             $status = 'error';

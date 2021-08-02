@@ -150,11 +150,23 @@
             var channel = pusher.subscribe('article-channel');
             channel.bind('App\\Events\\SendMessage', function(data) {
                 let userId = $('#userId').val()
-                if(userId == data.user.id){
+                if(userId == data.userData.userId){
+                    let message = data.message;
+                    let div1 =  document.createElement("div");
+                    div1.setAttribute("name", "notification");
+                    div1.setAttribute("class", "row");
 
-                    let message = '從pusher傳來通知：' + data.message;
-                    $('#showPusher').empty();
-                    $('#showPusher').text(message);
+                    if(data.userData.status != 'deleteArticle'){
+                        div1.innerHTML = "<div class='col-8'><input type='button' class='list-group-item list-group-item-action text-danger'"
+                            + " value='" + message + "'  onClick=showArticleContent('" + data.userData.articleId + "',"+"'" + data.userData.notificationId + "'," + "'N'" + ") /></div>"
+                            + " <div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀' onClick=readArticles(this" + ",'" + data.userData.notificationId + "'" + ") />" + "</div></div> ";
+                    }else{
+                        div1.innerHTML = "<div class='col-8'><input type='button' class='list-group-item list-group-item-action text-danger'"
+                            + " value='" + message + "'  onClick=showArticleContent('" + data.userData.articleId + "',"+"'" + data.userData.notificationId + "'," + "'N'" + ") /></div>"
+                            + " <div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀' onClick=readArticles(this" + ",'" + data.userData.notificationId + "'" + ") />" + "</div></div> ";
+                    }
+
+                    $('#notificationRaw').append(div1);
                 }
             });
         });
