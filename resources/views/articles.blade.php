@@ -166,7 +166,11 @@
                             + " <div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀' onClick=readArticles(this" + ",'" + data.userData.notificationId + "'" + ") />" + "</div></div> ";
                     }
 
+                    let html = $('#notificationRaw').html();
+                    $('#notificationRaw').empty();
                     $('#notificationRaw').append(div1);
+                    $('#notificationRaw').append(html);
+                    return false;
                 }
             });
         });

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\LazyCollection;
 use App\Events\AddArticles;
 use App\Events\DeleteArticles;
 use App\Models\Articles;
@@ -79,7 +80,7 @@ class ArticlesController extends Controller
             //執行事件傳訊息，顯示有一篇新文章
             //設定執行時間為10分鐘
             //set_time_limit(1200);
-
+            set_time_limit(0);
             // \App\User::chunk(1000, function($users)
             // {   
             //     foreach($users as $user)
@@ -94,10 +95,8 @@ class ArticlesController extends Controller
             //     event(new AddArticles($user, '新文章:' . $title, $id));
             // };
 
-            $datas = LazyCollection::make(function() {   
-                foreach (\App\User::cursor() as $user){ 
-                    yield $user;
-                }
+            $datas = \App\User::cursor()->filter(function ($user) {
+                return $user;
             });
             
             foreach ($datas as $data){
@@ -221,7 +220,7 @@ class ArticlesController extends Controller
 
             // $user =  User::where('id % 2', '=', $even);
             
-            set_time_limit(1200);
+            set_time_limit(0);
 
             $userData = [];
             foreach (\App\User::cursor() as $user) {
@@ -231,7 +230,7 @@ class ArticlesController extends Controller
                 
                 $data['message'] = '您有一篇新訊息【' . $title. '】';
                 $data['userData'] =  [
-                    'userId' => Auth::id(),
+                    'userId' => $user->id,
                     'articleId' => $id,
                     'notificationId' => $notification->id,
                     'isRead' => 'N',
