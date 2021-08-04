@@ -92,7 +92,7 @@
                                         <div class="row" name="notification">
                                             <div class="col-8">
                                                 <input type="button" class="list-group-item list-group-item-action" value="您有一篇新訊息【{{ $notification['title'] }}】" 
-                                                    @if ($notification['status'] != 'delete')
+                                                    @if ($notification['status'] != 'deleteArticle')
                                                         onclick="showArticleContent('{{ $notification['articlesId'] }}', '{{ $notification['id'] }}', '{{ $notification['read'] ? 'Y' : 'N' }}')"
                                                     @endif
                                                 />

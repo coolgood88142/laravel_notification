@@ -67,3 +67,8 @@ Route::get('/notification', function () {
 });
 
 Route::get('/send', 'PusherNotificationController@notification');
+
+Route::get('/t', function () {
+    event(new \App\Events\SendMessage());
+    dd('Event Run Successfully.');
+});
