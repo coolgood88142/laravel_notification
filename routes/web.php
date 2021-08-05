@@ -69,6 +69,8 @@ Route::get('/notification', function () {
 Route::get('/send', 'PusherNotificationController@notification');
 
 Route::get('/t', function () {
-    event(new \App\Events\SendMessage());
+    event(new \App\Events\RedisMessage());
     dd('Event Run Successfully.');
 });
+
+Route::get('/changeOption', 'ArticlesController@changeOption');

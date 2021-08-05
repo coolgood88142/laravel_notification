@@ -152,13 +152,16 @@
                 let userId = $('#userId').val()
                 if(userId == data.userData.userId){
                     let message = data.message;
+                    let notification = document.getElementsByName('notification')[0];
+                    let copy = notification.cloneNode(true);
+
                     let div1 =  document.createElement("div");
                     div1.setAttribute("name", "notification");
                     div1.setAttribute("class", "row");
 
                     if(data.userData.status != 'deleteArticle'){
                         div1.innerHTML = "<div class='col-8'><input type='button' class='list-group-item list-group-item-action text-danger'"
-                            + " value='" + message + "'  onClick=showArticleContent('" + data.userData.articleId + "',"+"'" + data.userData.notificationId + "'," + "'N'" + ") /></div>"
+                            + " value='" + message + "' /></div>"
                             + " <div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀' onClick=readArticles(this" + ",'" + data.userData.notificationId + "'" + ") />" + "</div></div> ";
                     }else{
                         div1.innerHTML = "<div class='col-8'><input type='button' class='list-group-item list-group-item-action text-danger'"

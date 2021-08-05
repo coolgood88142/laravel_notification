@@ -298,4 +298,23 @@ class ArticlesController extends Controller
             event(new AddArticles(\App\User::all(), '新文章:' . $title));
         }
     }
+
+    public function changeOption(Request $request){
+        // dd($request);
+        $sort = $request->sort;
+        $category = $request->category;
+
+        if($sort == '' || $sort == null){
+            $sort = '1';
+        }
+
+        if($category == '' || $category == null){
+            $category = '1';
+        }
+        // dd($option);
+        return view('select', [
+            'sort' => $sort,
+            'category' => $category,
+        ]);
+    }
 }
