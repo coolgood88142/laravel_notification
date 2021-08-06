@@ -23,19 +23,18 @@
                         <option value="3">音效</option>
                     </select>
                 </form>
-                <input type="hidden" id="getSort" name="getSort" value="{{ $sort }}">
-                <input type="hidden" id="getCategory" name="getCategory" value="{{ $category }}">
             </div>
         </div>
     </div>
     <script src="{{mix('js/app.js')}}"></script>
     <script>
-        let urlParams = new URLSearchParams(window.location);
+        let getSort = '{{ $sort }}';
+        let getCategory = '{{ $category }}';
+
+        let url = new URL(window.location);
+        let urlParams = new URLSearchParams({sort: getSort, category: getCategory});
 
         $(document).ready(function() {
-            let getSort =  $('#getSort').val()
-            let getCategory = $('#getCategory').val()
-
             if(getSort != '' && getSort != null){
                 $('#sort').val(getSort)
                 urlParams.set('sort', getSort);
@@ -46,20 +45,26 @@
                 urlParams.set('category', getCategory);
             }
 
-            history.pushState(null,null,'?sort=' + urlParams.get('sort') + '&category=' + urlParams.get('category'));
+            url.search = urlParams;
         });
 
         $('#sort').on('change', function(){
-            let url = '/changeOption?sort=' + $(this).val() + '&category=' + $('#category').val();
-            $('#send').attr('action', url);
-            $('#send').submit();
+            urlParams.set('sort', $(this).val())
+            send();
         });
 
         $('#category').on('change', function(){
-            let url = '/changeOption?sort=' + $('#sort').val() + '&category=' + $(this).val();
-            $('#send').attr('action', url);
-            $('#send').submit();
+            urlParams.set('category', $(this).val())
+            send();
         });
+
+        function send(){
+            url.search = urlParams;
+            window.location.href = url.href
+
+            $('#send').attr('action', url.href);
+            $('#send').submit();
+        }
     </script>
 </body>
 
