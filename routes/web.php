@@ -74,3 +74,7 @@ Route::get('/t', function () {
 });
 
 Route::get('/changeOption', 'ArticlesController@changeOption');
+
+Route::get('/redis', function () {
+    return view('redis');
+});
