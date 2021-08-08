@@ -57,6 +57,12 @@ Route::get('/showNotification', 'ArticlesController@showNotification');
 
 Route::get('/sendNotification', 'ArticlesController@sendNotification');
 
+Route::get('/addChannels', 'ChannelsController@showAddChannels');
+
+Route::post('/addChannels', 'ChannelsController@addChannels');
+
+Route::get('showChannelsContent', 'ChannelsController@showChannelsContent')->name('showCannelsContent');
+
 Route::get('test', function () {
     event(new App\Events\MyEvent('hello world'));
     return "Event has been sent!";
@@ -78,3 +84,5 @@ Route::get('/changeOption', 'ArticlesController@changeOption');
 Route::get('/redis', function () {
     return view('redis');
 });
+
+Route::get('/articlesRedis', 'ArticlesController@showAritclesRedis');

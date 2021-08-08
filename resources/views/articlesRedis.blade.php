@@ -123,24 +123,11 @@
                                         @endif
                                     </div>
                                 @endforeach
-                                <input type="button" class="btn btn-primary" value="新增文章" style="margin-top: 10px;" onclick="window.location.href='/add?userId={{ $userId }}'">
-                            </div>
-                            <div class="form-group">
-                                <div class="card-header">
-									頻道列表
-								</div>
-                                @foreach ($channels as $key => $channel)
-                                    <div class="row">
-                                        <div class="col-8">
-                                            <input type="button" class="list-group-item list-group-item-action" value="{{ $channel->name }}" onclick="showChannelsContent('{{ $channel->id }}')" />
-                                        </div>
-                                    </div>
-                                @endforeach
-                                <input type="button" class="btn btn-primary" value="新增頻道" style="margin-top: 10px;" onclick="window.location.href='/addChannels?userId={{ $userId }}'">
                             </div>
                             <div class="form-group">
                                 <input type="hidden" id="userId" name="userId" value="{{ $userId }}">
                                 <input type="hidden" id="notificationsCount" name="notificationsCount" value={{ $notificationsCount }}>
+                                <input type="button" class="btn btn-primary" value="新增文章" onclick="window.location.href='/add?userId={{ $userId }}'">
                             </div>
                         </div>
                     </div>
@@ -150,18 +137,17 @@
     </div>
     <script src="{{mix('js/app.js')}}"></script>
 	<script src="{{mix('js/edit.js')}}"></script>
-    <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
+    <script>
+        window.laravel_echo_port='{{env("LARAVEL_ECHO_PORT")}}';
+    </script>
+    <script src="//{{ Request::getHost() }}:{{env('LARAVEL_ECHO_PORT')}}/socket.io/socket.io.js"></script>
+    <script src="{{ url('/js/laravel-echo-setup.js') }}" type="text/javascript"></script>
     <script>
         $(document).ready(function() {
-             Pusher.logToConsole = true;
-
-            var pusher = new Pusher('408cd422417d5833d90d', {
-                cluster: 'ap3',
-                encrypted: true
-            });
-
-            var channel = pusher.subscribe('article-channel');
-            channel.bind('App\\Events\\SendMessage', function(data) {
+            var i = 0;
+            window.Echo.channel('article-channel')
+            .listen('.SendMessage', (data) => {
+                console.log(data.userData);
                 let userId = $('#userId').val()
                 if(userId == data.userData.userId){
                     let message = data.message;
@@ -250,14 +236,6 @@
             if(isRead != null){
                 url = url + '&isRead=' + isRead
             }
-
-            window.location.href = url;
-        }
-
-        function showChannelsContent(id){
-            let userId = $('#userId').val();
-            let url = '/showChannelsContent?channelsId='+ id +'&userId='+ userId;
-            
 
             window.location.href = url;
         }

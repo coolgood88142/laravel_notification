@@ -8,23 +8,28 @@ use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Queue\SerializesModels;
 
-class RedisMessage implements ShouldBroadcastNow
+class AddChannels
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $data;
+    public $user;
+    public $title;
+    public $articlesId;
+    public $status;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($data)
+    public function __construct($user, $title, $articlesId)
     {
-        $this->data = $data;
+        $this->user = $user;
+        $this->title = $title;
+        $this->articlesId = $articlesId;
+        $this->status = 'addChannel';
     }
 
     /**
@@ -34,25 +39,6 @@ class RedisMessage implements ShouldBroadcastNow
      */
     public function broadcastOn()
     {
-        return new Channel('article-channel');
-    }
-
-     /**
-     * The event's broadcast name.
-     *
-     * @return string
-     */
-    public function broadcastAs()
-    {
-        return 'SendMessage';
-    }
-    /**
-     * The event's broadcast name.
-     *
-     * @return string
-     */
-    public function broadcastWith()
-    {
-        return $this->data;
+        return new PrivateChannel('channel-name');
     }
 }

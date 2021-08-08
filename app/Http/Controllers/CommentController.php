@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 use App\Events\AddComment;
+use App\Events\RedisMessage;
 use App\Models\Articles;
 use App\Models\Comment;
 use App\User;
@@ -64,16 +66,14 @@ class CommentController extends Controller
             $users = User::WhereIn('id', $idArray)->get();
             event(new AddComment($users,  $title, $articleId));
 
-            $options = array(
-                'cluster' => 'ap3',
-                'encrypted' => true
-            );
-
             $pusher = new Pusher(
                 '408cd422417d5833d90d',
                 '2cb040ab9efbb676ed8b',
                 '1243356', 
-                $options
+                array(
+                    'cluster' => 'ap3',
+                    'encrypted' => true
+                )
             );
 
             foreach($users as $user){
@@ -87,8 +87,8 @@ class CommentController extends Controller
                     'isRead' => 'N',
                     'status' => 'addComment'
                 ];
-    
                 $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
+                event(new RedisMessage($data));
     
             }
 

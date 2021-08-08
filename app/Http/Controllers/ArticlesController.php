@@ -9,6 +9,7 @@ use Illuminate\Support\LazyCollection;
 use App\Events\AddArticles;
 use App\Events\DeleteArticles;
 use App\Models\Articles;
+use App\Models\Channels;
 use App\Models\Notifications;
 use App\User;
 use App\Models\Author;
@@ -34,18 +35,27 @@ class ArticlesController extends Controller
                 'id' => $notification->id,
                 'title' => $notification->data['title'],
                 'status' => $notification->data['status'],
-                'articlesId' => $notification->data['articlesId'],
                 'read' => $notification->read(),
                 'notThreeDay' => ceil((strtotime($notification->created_at) - strtotime($datetime))/86400) < 3
             ];
+
+            if($notification->data['status'] != 'addChannel'){
+                $array['articlesId'] = $notification->data['articlesId'];
+            }else{
+                $array['channelsId'] = $notification->data['channelsId'];
+            }
+
             array_push($notificationsArray, $array);
         }
+
         $articles = Articles::orderBy('id')->get();
+        $channels = Channels::orderBy('id')->get();
     
         $data = [
             'notifications' => $notificationsArray,
             'notificationsCount' => $count,
             'articles' => $articles,
+            'channels' => $channels,
             'userId' => $id,
             'datetime' => $datetime,
         ];
@@ -206,16 +216,14 @@ class ArticlesController extends Controller
             $articles->delete();
             $even = $isEven ? '0' : '1';
 
-            $options = array(
-                'cluster' => 'ap3',
-                'encrypted' => true
-            );
-            
             $pusher = new Pusher(
                 '408cd422417d5833d90d',
                 '2cb040ab9efbb676ed8b',
                 '1243356', 
-                $options
+                array(
+                    'cluster' => 'ap3',
+                    'encrypted' => true
+                )
             );
 
             // $user =  User::where('id % 2', '=', $even);
@@ -238,6 +246,7 @@ class ArticlesController extends Controller
                 ];
 
                 $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
+                event(new RedisMessage($data));
             };
 
             
@@ -276,7 +285,38 @@ class ArticlesController extends Controller
             
         }
         
-    } 
+    }
+    
+    public function showAritclesRedis(Request $request){
+        $id = Auth::id();
+        $user = \App\User::where('id', '=', $id)->first();
+        $count = 10;
+        $notifications = $user->notifications->take($count);
+        $datetime = Carbon::now()->setTimezone('Asia/Taipei')->toDateTimeString();
+        $notificationsArray = [];
+        foreach($notifications as $notification){
+            $array = [ 
+                'id' => $notification->id,
+                'title' => $notification->data['title'],
+                'status' => $notification->data['status'],
+                'articlesId' => $notification->data['articlesId'],
+                'read' => $notification->read(),
+                'notThreeDay' => ceil((strtotime($notification->created_at) - strtotime($datetime))/86400) < 3
+            ];
+            array_push($notificationsArray, $array);
+        }
+        $articles = Articles::orderBy('id')->get();
+    
+        $data = [
+            'notifications' => $notificationsArray,
+            'notificationsCount' => $count,
+            'articles' => $articles,
+            'userId' => $id,
+            'datetime' => $datetime,
+        ];
+
+        return view('articlesRedis', $data);
+    }
     
     public function showAdd(Request $request)
     {

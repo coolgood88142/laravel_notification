@@ -24,32 +24,37 @@ class PusherNotificationController extends Controller
 			$options
 		);
 
-		$date = Carbon::now()->setTimezone('Asia/Taipei')->toDateString();
-        $articles= Articles::where('online_date', '=', $date)->get();
-        foreach($articles as $article){
-            set_time_limit(1200);
-            
-            $title = $article->title;
-            $id = $article->id;
-            $sendNotice = $article->send_notice;
-
-            if($sendNotice == 'Y'){
-                foreach (\App\User::cursor() as $user) {
-                    $notification = $user->notifications()->where('data->status', '=', 'addArticle')->first();
+        try{
+            $date = Carbon::now()->setTimezone('Asia/Taipei')->toDateString();
+            $articles= Articles::where('online_date', '=', $date)->get();
+            foreach($articles as $article){
+                set_time_limit(1200);
                 
-                    $data['message'] = '您有一篇新訊息【' . $title. '】';
-                    $data['userData'] =  [
-                        'userId' => Auth::id(),
-                        'articleId' => $id,
-                        'notificationId' => $notification->id,
-                        'isRead' => 'N',
-                        'status' => 'addArticle'
-                    ];
+                $title = $article->title;
+                $id = $article->id;
+                $sendNotice = $article->send_notice;
 
-                    $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
-                };
+                if($sendNotice == 'Y'){
+                    foreach (\App\User::cursor() as $user) {
+                        $notification = $user->notifications()->where('data->status', '=', 'addArticle')->first();
+                    
+                        $data['message'] = '您有一篇新訊息【' . $title. '】';
+                        $data['userData'] =  [
+                            'userId' => Auth::id(),
+                            'articleId' => $id,
+                            'notificationId' => $notification->id,
+                            'isRead' => 'N',
+                            'status' => 'addArticle'
+                        ];
+
+                        $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
+                    };
+                }
+                
             }
-            
+        }catch(Exception $e){
+            dd($e);
         }
+        
     }
 }
