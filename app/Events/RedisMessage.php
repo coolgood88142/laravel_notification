@@ -34,7 +34,7 @@ class RedisMessage implements ShouldBroadcastNow
      */
     public function broadcastOn()
     {
-        return new Channel('article-channel');
+        return new Channel('article-channel' . $this->data['userData']['userId']);
     }
 
      /**
