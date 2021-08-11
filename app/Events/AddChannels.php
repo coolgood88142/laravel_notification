@@ -16,7 +16,7 @@ class AddChannels
 
     public $user;
     public $title;
-    public $articlesId;
+    public $channelsId;
     public $status;
 
     /**
@@ -24,11 +24,11 @@ class AddChannels
      *
      * @return void
      */
-    public function __construct($user, $title, $articlesId)
+    public function __construct($user, $title, $channelsId)
     {
         $this->user = $user;
         $this->title = $title;
-        $this->articlesId = $articlesId;
+        $this->channelsId = $channelsId;
         $this->status = 'addChannel';
     }
 

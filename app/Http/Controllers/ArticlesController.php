@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\LazyCollection;
 use App\Events\AddArticles;
 use App\Events\DeleteArticles;
+use App\Events\RedisMessage;
 use App\Models\Articles;
 use App\Models\Channels;
 use App\Models\Notifications;
@@ -30,23 +31,23 @@ class ArticlesController extends Controller
         $notifications = $user->notifications->take($count);
         $datetime = Carbon::now()->setTimezone('Asia/Taipei')->toDateTimeString();
         $notificationsArray = [];
-        foreach($notifications as $notification){
-            $array = [ 
-                'id' => $notification->id,
-                'title' => $notification->data['title'],
-                'status' => $notification->data['status'],
-                'read' => $notification->read(),
-                'notThreeDay' => ceil((strtotime($notification->created_at) - strtotime($datetime))/86400) < 3
-            ];
+        // foreach($notifications as $notification){
+        //     $array = [ 
+        //         'id' => $notification->id,
+        //         'title' => $notification->data['title'],
+        //         'status' => $notification->data['status'],
+        //         'read' => $notification->read(),
+        //         'notThreeDay' => ceil((strtotime($notification->created_at) - strtotime($datetime))/86400) < 3
+        //     ];
 
-            if($notification->data['status'] != 'addChannel'){
-                $array['articlesId'] = $notification->data['articlesId'];
-            }else{
-                $array['channelsId'] = $notification->data['channelsId'];
-            }
+        //     if($notification->data['status'] != 'addChannel'){
+        //         $array['categoryId'] = $notification->data['articlesId'];
+        //     }else{
+        //         $array['categoryId'] = $notification->data['channelsId'];
+        //     }
 
-            array_push($notificationsArray, $array);
-        }
+        //     array_push($notificationsArray, $array);
+        // }
 
         $articles = Articles::orderBy('id')->get();
         $channels = Channels::orderBy('id')->get();
@@ -82,8 +83,8 @@ class ArticlesController extends Controller
         $articles->save();
         $title = $articles->title;
         $id = $articles->id;
-        // $this->title = $title;
-        // $this->id = $id;
+        $this->title = $title;
+        $this->id = $id;
 
         //判斷新增後的title和id不為null或空白
         if($title != null && $title != '' && $id != null && $id != ''){
@@ -91,27 +92,24 @@ class ArticlesController extends Controller
             //設定執行時間為10分鐘
             //set_time_limit(1200);
             set_time_limit(0);
-            // \App\User::chunk(1000, function($users)
-            // {   
-            //     foreach($users as $user)
-            //     {
-            //         $title = $this->title;
-            //         $id = $this->id;
-            //         event(new AddArticles(\App\User::all(), '新文章:' . $title, $id));
-            //     }
-            // });
+            \App\User::chunk(10000, function($users)
+            {   
+                $title = $this->title;
+                $id = $this->id;
+                event(new AddArticles($users, '新文章:' . $title, $id));
+            });
 
             // foreach (\App\User::cursor() as $user) {
             //     event(new AddArticles($user, '新文章:' . $title, $id));
             // };
 
-            $datas = \App\User::cursor()->filter(function ($user) {
-                return $user;
-            });
+            // $datas = \App\User::cursor()->filter(function ($user) {
+            //     return $user;
+            // });
             
-            foreach ($datas as $data){
-                event(new AddArticles($data, '新文章:' . $title, $id));
-            }
+            // foreach ($datas as $data){
+            //     event(new AddArticles($data, '新文章:' . $title, $id));
+            // }
             
         }
 
@@ -126,9 +124,15 @@ class ArticlesController extends Controller
         // $notifications->created_at = Carbon::now();
         // $notifications->save();
         $status = 'success';
-        // $id = 'e093a6e5-e181-4829-a6ed-e7183f93220c';
+        // $id = '603482ff-9639-4e19-9941-9de2964b20ba';
+        // $userId = Auth::id();
         try{
-            $this->readNotifications($id, $userId);
+            if($id != ''){
+                $this->readNotifications($id, $userId);
+            }else{
+                $this->readNotificationsAll($userId);
+            }
+            
         }catch(Exception $e){
             $status = 'error';
         }
@@ -137,19 +141,24 @@ class ArticlesController extends Controller
 
     public function readNotifications($id, $userId){
         $user = User::where('id', '=', $userId)->first();
-        $data = $user->unreadNotifications;
+        $data = $user->unreadNotifications->where('id', '=', $id)->first()->markAsRead();
+    }
+
+    public function readNotificationsAll($userId){
+        $user = User::where('id', '=', $userId)->first();
+        $data = $user->unreadNotifications->markAsRead();
             
-        if($id != ''){
-            foreach($data as $key => $value){
-                $dataId = $value->id;
-                if($dataId == $id){
-                    $value->markAsRead();
-                        break;
-                }
-            }
-        }else{
-            $data->markAsRead();
-        }
+        // if($id != ''){
+        //     foreach($data as $key => $value){
+        //         $dataId = $value->id;
+        //         if($dataId == $id){
+        //             $value->markAsRead();
+        //                 break;
+        //         }
+        //     }
+        // }else{
+        //     $data->markAsRead();
+        // }
     }
 
     public function showArticleContent(Request $request)

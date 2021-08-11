@@ -93,7 +93,7 @@
                                             <div class="col-8">
                                                 <input type="button" class="list-group-item list-group-item-action" value="您有一篇新訊息【{{ $notification['title'] }}】" 
                                                     @if ($notification['status'] != 'deleteArticle')
-                                                        onclick="showArticleContent('{{ $notification['articlesId'] }}', '{{ $notification['id'] }}', '{{ $notification['read'] ? 'Y' : 'N' }}')"
+                                                        onclick="showArticleContent('{{ $notification['categoryId'] }}', '{{ $notification['id'] }}', '{{ $notification['read'] ? 'Y' : 'N' }}')"
                                                     @endif
                                                 />
                                             </div>
@@ -193,21 +193,21 @@
                         if(value.data.status != 'delete'){
                             if(value.read_at != null){
                                 div1.innerHTML = "<div class='col-8'><input type='button' class='list-group-item list-group-item-action'"
-                                    + " value='您有一篇新訊息【" + value.data.title + "】'  onClick=showArticleContent('" + value.data.articlesId + "',"+"'" + value.id + "'," + "'Y'" + ") /></div>"
+                                    + " value='您有一篇新訊息【" + value.data.title + "】'  onClick=showArticleContent('" + value.data.categoryId + "',"+"'" + value.id + "'," + "'Y'" + ") /></div>"
                                     + " <div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀' onClick=readArticles(this" + ",'" + value.id + "'" + ") disabled />" + "</div></div> ";
                             }else{
                                 div1.innerHTML = "<div class='col-8'><input type='button' class='list-group-item list-group-item-action'"
-                                    + " value='您有一篇新訊息【" + value.data.title + "】'  onClick=showArticleContent('" + value.data.articlesId + "',"+"'" + value.id + "'," + "'N'" + ") /></div>"
+                                    + " value='您有一篇新訊息【" + value.data.title + "】'  onClick=showArticleContent('" + value.data.categoryId + "',"+"'" + value.id + "'," + "'N'" + ") /></div>"
                                     + " <div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀' onClick=readArticles(this" + ",'" + value.id + "'" + ") disabled />" + "</div></div> ";
                             }
                         }else{
                             if(value.read_at != null){
                                 div1.innerHTML = "<div class='col-8'><input type='button' class='list-group-item list-group-item-action'"
-                                    + " value='您有一篇新訊息【" + value.data.title + "】'  onClick=showArticleContent('" + value.data.articlesId + "',"+"'" + value.id + "'," + "'Y'" + ") /></div>"
+                                    + " value='您有一篇新訊息【" + value.data.title + "】'  onClick=showArticleContent('" + value.data.categoryId + "',"+"'" + value.id + "'," + "'Y'" + ") /></div>"
                                     + " <div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀' onClick=readArticles(this" + ",'" + value.id + "'" + ") />" + "</div></div> ";
                             }else{
                                 div1.innerHTML = "<div class='col-8'><input type='button' class='list-group-item list-group-item-action'"
-                                    + " value='您有一篇新訊息【" + value.data.title + "】'  onClick=showArticleContent('" + value.data.articlesId + "',"+"'" + value.id + "'," + "'N'" + ") /></div>"
+                                    + " value='您有一篇新訊息【" + value.data.title + "】'  onClick=showArticleContent('" + value.data.categoryId + "',"+"'" + value.id + "'," + "'N'" + ") /></div>"
                                     + " <div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀' onClick=readArticles(this" + ",'" + value.id + "'" + ") />" + "</div></div> ";
                             }
                         }

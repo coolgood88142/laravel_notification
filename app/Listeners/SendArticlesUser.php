@@ -32,13 +32,19 @@ class SendArticlesUser implements ShouldQueue
      */
     public function handle($event)
     {
-        // $users = $event->user;
-        // foreach($users as $user){
-        //     Notification::send($user, new NewNotification($user, $event->title, $event->articlesId, $event->status));
-        // }
-        // $event->user->cursor()->filter(function ($user) {
-        //     Notification::send($user, new NewNotification($user, $event->title, $event->articlesId, $event->status));
-        // });
-        Notification::send($event->user, new NewNotification($event->user, $event->title, $event->articlesId, $event->status));
+        $id = '';
+        $users = $event->user;
+
+        foreach($users as $user){
+            if($event->status != 'addChannel'){
+                $id = $event->articlesId;
+            }else{
+                $id = $event->channelsId; 
+            }
+    
+            Notification::send($user, new NewNotification($user, $event->title, $id, $event->status));
+        }
+
+       
     }
 }

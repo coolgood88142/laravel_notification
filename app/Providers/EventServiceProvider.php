@@ -27,6 +27,9 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\DeleteArticles' => [
             'App\Listeners\SendArticlesUser',
         ],
+        'App\Events\AddChannels' => [
+            'App\Listeners\SendArticlesUser',
+        ],
     ];
 
     /**

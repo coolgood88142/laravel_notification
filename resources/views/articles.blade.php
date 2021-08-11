@@ -87,23 +87,7 @@
                                             onCLick="readArticles(this, '')" />
 								</div>
                                 <div id="notificationRaw">
-								@foreach ($notifications as $key => $notification)
-                                    @if($notification['notThreeDay'])
-                                        <div class="row" name="notification">
-                                            <div class="col-8">
-                                                <input type="button" class="list-group-item list-group-item-action" value="您有一篇新訊息【{{ $notification['title'] }}】" 
-                                                    @if ($notification['status'] != 'deleteArticle')
-                                                        onclick="showArticleContent('{{ $notification['articlesId'] }}', '{{ $notification['id'] }}', '{{ $notification['read'] ? 'Y' : 'N' }}')"
-                                                    @endif
-                                                />
-                                            </div>
-                                            <div class="col-4">
-                                                <input type="button" class="btn btn-primary" name="read" value="已閱讀"
-                                                onCLick="readArticles(this, '{{ $notification['id'] }}')" {{ $notification['read'] ? 'disabled' : '' }} />
-                                            </div>
-                                        </div>
-                                    @endif
-								@endforeach
+								
                                 </div>
                                 <input type="button" id="moreArticles" name="moreArticles" class="btn btn-primary" style="margin-top: 10px;" value="更多" onClick="showNotification()">
                             </div>
@@ -132,7 +116,7 @@
                                 @foreach ($channels as $key => $channel)
                                     <div class="row">
                                         <div class="col-8">
-                                            <input type="button" class="list-group-item list-group-item-action" value="{{ $channel->name }}" onclick="showChannelsContent('{{ $channel->id }}')" />
+                                            <input type="button" class="list-group-item list-group-item-action" value="{{ $channel->name }}" onclick="showChannelContent('{{ $channel->id }}')" />
                                         </div>
                                     </div>
                                 @endforeach
@@ -153,6 +137,7 @@
     <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
     <script>
         $(document).ready(function() {
+            showNotification();
              Pusher.logToConsole = true;
 
             var pusher = new Pusher('408cd422417d5833d90d', {
@@ -208,27 +193,45 @@
                         div1.setAttribute("name", "notification");
                         div1.setAttribute("class", "row");
 
-                        if(value.data.status != 'delete'){
-                            if(value.read_at != null){
-                                div1.innerHTML = "<div class='col-8'><input type='button' class='list-group-item list-group-item-action'"
-                                    + " value='您有一篇新訊息【" + value.data.title + "】'  onClick=showArticleContent('" + value.data.articlesId + "',"+"'" + value.id + "'," + "'Y'" + ") /></div>"
-                                    + " <div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀' onClick=readArticles(this" + ",'" + value.id + "'" + ") disabled />" + "</div></div> ";
-                            }else{
-                                div1.innerHTML = "<div class='col-8'><input type='button' class='list-group-item list-group-item-action'"
-                                    + " value='您有一篇新訊息【" + value.data.title + "】'  onClick=showArticleContent('" + value.data.articlesId + "',"+"'" + value.id + "'," + "'N'" + ") /></div>"
-                                    + " <div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀' onClick=readArticles(this" + ",'" + value.id + "'" + ") disabled />" + "</div></div> ";
-                            }
-                        }else{
-                            if(value.read_at != null){
-                                div1.innerHTML = "<div class='col-8'><input type='button' class='list-group-item list-group-item-action'"
-                                    + " value='您有一篇新訊息【" + value.data.title + "】'  onClick=showArticleContent('" + value.data.articlesId + "',"+"'" + value.id + "'," + "'Y'" + ") /></div>"
-                                    + " <div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀' onClick=readArticles(this" + ",'" + value.id + "'" + ") />" + "</div></div> ";
-                            }else{
-                                div1.innerHTML = "<div class='col-8'><input type='button' class='list-group-item list-group-item-action'"
-                                    + " value='您有一篇新訊息【" + value.data.title + "】'  onClick=showArticleContent('" + value.data.articlesId + "',"+"'" + value.id + "'," + "'N'" + ") /></div>"
-                                    + " <div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀' onClick=readArticles(this" + ",'" + value.id + "'" + ") />" + "</div></div> ";
+                        let div2 =  document.createElement("div");
+                        div2.setAttribute("class", "col-8");
+
+                        let button1 =  document.createElement("input");
+                        button1.setAttribute("type", "button");
+                        button1.setAttribute("class", "list-group-item list-group-item-action");
+                        button1.setAttribute("value", "您有一篇新訊息【" + value.data.title + "】");
+                        button1.onclick = function(){
+                            if(value.data.status != 'deleteArticle'){
+                                if(value.data.status == 'addChannel'){
+                                    showChannelContent(value.data.channelsId, value.id, 'Y');
+                                }else{
+                                    showArticleContent(value.data.articlesId, value.id, 'Y');
+                                }
                             }
                         }
+
+                        div2.appendChild(button1);
+
+                        let div3 =  document.createElement("div");
+                        div3.setAttribute("class", "col-4");
+
+                        let button2 =  document.createElement("input");
+                        button2.setAttribute("type", "button");
+                        button2.setAttribute("class", "btn btn-primary");
+                        button2.setAttribute("name", "read");
+                        button2.setAttribute("value", "已閱讀");
+                        button2.onclick = function(){
+                            readArticles(this, value.id);
+                        }
+
+                        if(value.read_at != null){
+                            button2.disabled = true;
+                        }
+
+                        div3.appendChild(button2);
+
+                        div1.appendChild(div2);
+                        div1.appendChild(div3);
 
                         $('#notificationRaw').append(div1);
                     });
@@ -254,10 +257,17 @@
             window.location.href = url;
         }
 
-        function showChannelsContent(id){
+        function showChannelContent(id, notificationId, isRead){
             let userId = $('#userId').val();
-            let url = '/showChannelsContent?channelsId='+ id +'&userId='+ userId;
+            let url = '/showChannelContent?channelsId='+ id +'&userId='+ userId;
             
+            if(notificationId != null){
+                url = url + '&notificationId=' + notificationId
+            }
+
+            if(isRead != null){
+                url = url + '&isRead=' + isRead
+            }
 
             window.location.href = url;
         }

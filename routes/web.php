@@ -61,7 +61,7 @@ Route::get('/addChannels', 'ChannelsController@showAddChannels');
 
 Route::post('/addChannels', 'ChannelsController@addChannels');
 
-Route::get('showChannelsContent', 'ChannelsController@showChannelsContent')->name('showCannelsContent');
+Route::get('showChannelContent', 'ChannelsController@showChannelContent')->name('showCannelsContent');
 
 Route::get('test', function () {
     event(new App\Events\MyEvent('hello world'));

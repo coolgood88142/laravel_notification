@@ -6,10 +6,15 @@ use Illuminate\Http\Request;
 use App\Models\Articles;
 use App\Models\Channels;
 use App\Models\ChannelsArticles;
+use App\Events\AddChannels;
+use App\Events\RedisMessage;
+use Pusher\Pusher;
 
 class ChannelsController extends Controller
 {
-    
+    public $name;
+    public $channelsId;
+
     public function showAddChannels(Request $request)
     {
         $userId = $request->userId;
@@ -44,13 +49,27 @@ class ChannelsController extends Controller
             $channelsArticles->save();
         }
 
-        $name = '新頻道 ' .$InputChannelsName;
+        $name = '新頻道 ' . $InputChannelsName;
 
-        foreach (\App\User::cursor() as $user) {
-            event(new AddChannels($users,  $name, $channelsId));
+        $this->name = $name;
+        $this->channelsId = $channelsId;
+
+        $pusher = new Pusher(
+            '408cd422417d5833d90d',
+            '2cb040ab9efbb676ed8b',
+            '1243356', 
+            array(
+                'cluster' => 'ap3',
+                'encrypted' => true
+            )
+        );
+
+        set_time_limit(0);
+        \App\User::chunk(10000, function($users)
+        {   
+            event(new AddChannels($users,  $this->name, $this->channelsId));
 
             $notification = $user->notifications()->where('data->status', '=', 'addChannel')->first();
-                
             $data['message'] = '您有一篇新訊息【' . $name. '】';
             $data['userData'] =  [
                 'userId' => $user->id,
@@ -60,21 +79,48 @@ class ChannelsController extends Controller
                 'status' => 'addChannel'
             ];
 
+            // // event(new SendMessage($data));
             $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
             event(new RedisMessage($data));
-        }
+        });
+
+        // foreach (\App\User::cursor() as $user) {
+        //     event(new AddChannels($user,  $name, $channelsId));
+
+        //     $notification = $user->notifications()->where('data->status', '=', 'addChannel')->first();
+        //     $data['message'] = '您有一篇新訊息【' . $name. '】';
+        //     $data['userData'] =  [
+        //         'userId' => $user->id,
+        //         'channelsId' => $channelsId,
+        //         'notificationId' => $notification->id,
+        //         'isRead' => 'N',
+        //         'status' => 'addChannel'
+        //     ];
+
+        //     // // event(new SendMessage($data));
+        //     $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
+        //     event(new RedisMessage($data));
+        // }
 
         return redirect()->route('showAritcles');
     }
 
-    public function showChannelsContent(Request $request)
+    public function showChannelContent(Request $request)
     {
         $userId = $request->userId;
+        $notificationId = $request->notificationId;
+        $isRead = $request->isRead;
         $channelsId = $request->channelsId;
         $channels = Channels::where('id', '=', $channelsId)->first();
         $idArray = [];
 
         $channelsArticles = ChannelsArticles::where('channels_id', '=', $channels->id)->get();
+
+        if($notificationId != null && $userId != null && $isRead == 'N'){
+            //點選後直接做已閱讀
+            $controller = new ArticlesController();
+            $controller->readNotifications($notificationId, $userId);
+        }
         
         foreach($channelsArticles as $channel){
             array_push($idArray, $channel->articles_id);
