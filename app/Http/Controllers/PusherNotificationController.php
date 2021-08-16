@@ -39,7 +39,7 @@ class PusherNotificationController extends Controller
                     {   
                         $title = $this->title;
                         $id = $this->id;
-                        event(new DeleteArticles($users, $title, $id));
+                        event(new AddArticles($users, $title, $id));
                         
                         $data['message'] = '您有一篇新訊息【' . $title. '】';
                         $data['userData'] =  [

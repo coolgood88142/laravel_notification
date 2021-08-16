@@ -17,6 +17,7 @@ use Auth;
 
 class CommentController extends Controller
 {
+    //顯示留言畫面
     public function editComment(Request $request)
     {
         $articleId = $request->articleId;
@@ -39,6 +40,7 @@ class CommentController extends Controller
         ]);
     }
 
+    //新增留言
     public function addComment(Request $request)
     {
         $userId = $request->userId;
@@ -86,7 +88,7 @@ class CommentController extends Controller
                 'articleId' => $articleId,
                 // 'notificationId' => $notification->id,
                 'isRead' => 'N',
-                'status' => 'addComment'
+                'type' => 'addComment'
             ];
 
             $data['users'] = $users;

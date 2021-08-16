@@ -16,20 +16,20 @@ class AddComment
 
     public $user;
     public $title;
-    public $articlesId;
-    public $status;
+    public $typeId;
+    public $type;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($user, $title, $articlesId)
+    public function __construct($user, $title, $typeId)
     {
         $this->user = $user;
         $this->title = $title;
-        $this->articlesId = $articlesId;
-        $this->status = 'addComment';
+        $this->typeId = $typeId;
+        $this->type = 'addComment';
     }
 
     /**

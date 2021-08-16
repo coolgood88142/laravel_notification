@@ -19,16 +19,16 @@ class EventServiceProvider extends ServiceProvider
             SendEmailVerificationNotification::class,
         ],
         'App\Events\AddArticles' => [
-            'App\Listeners\SendArticlesUser',
+            'App\Listeners\NewArticle',
         ],
         'App\Events\AddComment' => [
-            'App\Listeners\SendArticlesUser',
+            'App\Listeners\NewArticle',
         ],
         'App\Events\DeleteArticles' => [
-            'App\Listeners\SendArticlesUser',
+            'App\Listeners\NewArticle',
         ],
         'App\Events\AddChannels' => [
-            'App\Listeners\SendArticlesUser',
+            'App\Listeners\NewChannel',
         ],
     ];
 

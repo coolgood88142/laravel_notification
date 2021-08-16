@@ -23,6 +23,8 @@ class ArticlesController extends Controller
 {
     public $title;
     public $id;
+
+    //文章列表-顯示所有文章、頻道
     public function showAritcles(Request $request)
     {   
         $id = Auth::id();
@@ -31,24 +33,6 @@ class ArticlesController extends Controller
         $notifications = $user->notifications->take($count);
         $datetime = Carbon::now()->setTimezone('Asia/Taipei')->toDateTimeString();
         $notificationsArray = [];
-        // foreach($notifications as $notification){
-        //     $array = [ 
-        //         'id' => $notification->id,
-        //         'title' => $notification->data['title'],
-        //         'status' => $notification->data['status'],
-        //         'read' => $notification->read(),
-        //         'notThreeDay' => ceil((strtotime($notification->created_at) - strtotime($datetime))/86400) < 3
-        //     ];
-
-        //     if($notification->data['status'] != 'addChannel'){
-        //         $array['categoryId'] = $notification->data['articlesId'];
-        //     }else{
-        //         $array['categoryId'] = $notification->data['channelsId'];
-        //     }
-
-        //     array_push($notificationsArray, $array);
-        // }
-
         $articles = Articles::orderBy('id')->get();
         $channels = Channels::orderBy('id')->get();
     
@@ -65,9 +49,9 @@ class ArticlesController extends Controller
     } 
 
 
+    //新增一篇文章
     public function addArticles(Request $request)
     {
-        //新增一篇文章
         $articles = new Articles();
         $articles->title = $request->InputTitle;
         $articles->content = $request->InputContent;
@@ -89,8 +73,6 @@ class ArticlesController extends Controller
         //判斷新增後的title和id不為null或空白
         if($title != null && $title != '' && $id != null && $id != ''){
             //執行事件傳訊息，顯示有一篇新文章
-            //設定執行時間為10分鐘
-            //set_time_limit(1200);
             set_time_limit(0);
             \App\User::chunk(10000, function($users)
             {   
@@ -98,38 +80,23 @@ class ArticlesController extends Controller
                 $id = $this->id;
                 event(new AddArticles($users, '新文章:' . $title, $id));
             });
-
-            // foreach (\App\User::cursor() as $user) {
-            //     event(new AddArticles($user, '新文章:' . $title, $id));
-            // };
-
-            // $datas = \App\User::cursor()->filter(function ($user) {
-            //     return $user;
-            // });
-            
-            // foreach ($datas as $data){
-            //     event(new AddArticles($data, '新文章:' . $title, $id));
-            // }
-            
         }
 
         return redirect()->route('showAritcles');
     }
 
+    //已閱讀通知 or 已閱讀全部
     public function readArticles(Request $request)
     {
         $id = $request->id;
         $userId = $request->userId;
-        // $notifications = Notifications::Where('id', '=', $id);
-        // $notifications->created_at = Carbon::now();
-        // $notifications->save();
         $status = 'success';
-        // $id = '603482ff-9639-4e19-9941-9de2964b20ba';
-        // $userId = Auth::id();
         try{
             if($id != ''){
+                //已閱讀通知
                 $this->readNotifications($id, $userId);
             }else{
+                //已閱讀全部
                 $this->readNotificationsAll($userId);
             }
             
@@ -139,28 +106,19 @@ class ArticlesController extends Controller
         return $status;
     }
 
+    //已閱讀通知
     public function readNotifications($id, $userId){
         $user = User::where('id', '=', $userId)->first();
         $data = $user->unreadNotifications->where('id', '=', $id)->first()->markAsRead();
     }
 
+    //已閱讀全部
     public function readNotificationsAll($userId){
         $user = User::where('id', '=', $userId)->first();
         $data = $user->unreadNotifications->markAsRead();
-            
-        // if($id != ''){
-        //     foreach($data as $key => $value){
-        //         $dataId = $value->id;
-        //         if($dataId == $id){
-        //             $value->markAsRead();
-        //                 break;
-        //         }
-        //     }
-        // }else{
-        //     $data->markAsRead();
-        // }
     }
 
+    //顯示單篇文章內容
     public function showArticleContent(Request $request)
     {
         $id = $request->id;
@@ -197,6 +155,7 @@ class ArticlesController extends Controller
         ]);
     }
 
+    //儲存文章
     public function saveArticles(Request $request)
     {
         $id = $request->id;
@@ -213,9 +172,9 @@ class ArticlesController extends Controller
         return $status;
     }
 
+    //刪除文章
     public function deleteArticles(Request $request)
     {
-        //刪除一篇文章
         $id = $request->id;
         $isEven = $request->isEven;
         $status = 'success';
@@ -248,35 +207,13 @@ class ArticlesController extends Controller
                 $data['userData'] =  [
                     'articleId' => $id,
                     'isRead' => 'N',
-                    'status' => 'deleteArticle'
+                    'type' => 'deleteArticle'
                 ];
 
                 $data['users'] = $users;
                 $pusher->trigger('article-channel' . $id, 'App\\Events\\SendMessage', $data);
                 event(new RedisMessage($data));
             });
-
-            // $userData = [];
-            // foreach (\App\User::cursor() as $user) {
-            //     event(new DeleteArticles($user, $title, $id));
-                
-            //     $notification = $user->notifications()->where('data->status', '=', 'deleteArticle')->first();
-                
-            //     $data['message'] = '您有一篇新訊息【' . $title. '】';
-            //     $data['userData'] =  [
-            //         'userId' => $user->id,
-            //         'articleId' => $id,
-            //         'notificationId' => $notification->id,
-            //         'isRead' => 'N',
-            //         'status' => 'deleteArticle'
-            //     ];
-
-            //     $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
-            //     event(new RedisMessage($data));
-            // };
-
-            
-
         }catch(Exception $e){
             $status = 'error';
         }
@@ -284,6 +221,7 @@ class ArticlesController extends Controller
         return $status;
     }
 
+    //通知列表-顯示全部的通知
     public function showNotification(Request $request){
         $nowCount = $request->nowCount;
         $count = $request->count;
@@ -336,13 +274,12 @@ class ArticlesController extends Controller
         return view('articlesRedis', $data);
     }
 
+    //收到推播資料時，查詢通知的相關資料，組元素用的
     public function getNotificationData(Request $request)
     {
         $id = $request->id;
-        $status = $request->status;
         $user = User::where('id', '=', $id)->first();
-        // $status = 'addComment';
-        $notification = $user->notifications()->where('data->status', '=', $status)->first();
+        $notification = $user->notifications()->first();
 
         return [
             'userId' => $user->id,
@@ -351,6 +288,7 @@ class ArticlesController extends Controller
         ];
     }
     
+    //顯示新增文章畫面
     public function showAdd(Request $request)
     {
         $userId = $request->userId;
@@ -358,18 +296,6 @@ class ArticlesController extends Controller
         return view('add', [
             'userId' => $userId,
         ]);
-    }
-
-    public function testAdd(){
-        $articles = \App\Models\Articles::factory()->count(1)->create(); 
-        $array = $articles->toArray();
-        $title = $array[0]['title'];
-
-        //判斷新增後的title不為null或空白
-        if($title != null || $title != ''){
-            //執行事件傳訊息，顯示有一篇新文章
-            event(new AddArticles(\App\User::all(), '新文章:' . $title));
-        }
     }
 
     public function changeOption(Request $request){

@@ -87,7 +87,6 @@
                                             onCLick="readArticles(this, '')" />
 								</div>
                                 <div id="notificationRaw">
-								
                                 </div>
                                 <input type="button" id="moreArticles" name="moreArticles" class="btn btn-primary" style="margin-top: 10px;" value="更多" onClick="showNotification()">
                             </div>
@@ -227,26 +226,6 @@
             });
         });
 
-        function getNotificationData(user, status){
-            let data = [];
-            $.ajax({
-				url: '/getNotificationData', 
-				type: 'POST',
-				data:{
-                    'user' : user,
-					'status' : status,
-					'_token':'{{csrf_token()}}'
-				},
-				success: function(result){
-                    return result;
-                },
-				error:function(xhr, status, error){
-					alert(xhr.statusText);
-				}
-			});
-            return data;
-        }
-
         function showNotification(){
             $.ajax({
 				url: '/showNotification', 
@@ -258,20 +237,12 @@
 				},
 				success: function(result){
                     
-                    
+                    console.log(result);
                     $.each(result, function(index, value) {
-                        let div1 =  document.createElement("div");
-                        div1.setAttribute("name", "notification");
-                        div1.setAttribute("class", "row");
-
-                        let div2 =  document.createElement("div");
-                        div2.setAttribute("class", "col-8");
-
-                        let button1 =  document.createElement("input");
-                        button1.setAttribute("type", "button");
-                        button1.setAttribute("class", "list-group-item list-group-item-action");
-                        button1.setAttribute("value", "您有一篇新訊息【" + value.data.title + "】");
-                        button1.onclick = function(){
+                        let button = document.getElementsByClassName("list-group-item list-group-item-action");
+                        let buttonCopy = button.cloneNode(true);
+                        buttonCopy.setAttribute("value", "您有一篇新訊息【" + value.data.title + "】");
+                        buttonCopy.onclick = function(){
                             if(value.data.status != 'deleteArticle'){
                                 if(value.data.status == 'addChannel'){
                                     showChannelContent(value.data.channelsId, value.id, 'Y');
@@ -280,6 +251,28 @@
                                 }
                             }
                         }
+
+
+                        let div1 =  document.createElement("div");
+                        div1.setAttribute("name", "notification");
+                        div1.setAttribute("class", "row");
+
+                        let div2 =  document.createElement("div");
+                        div2.setAttribute("class", "col-8");
+
+                        // let button1 =  document.createElement("input");
+                        // button1.setAttribute("type", "button");
+                        // button1.setAttribute("class", "list-group-item list-group-item-action");
+                        // button1.setAttribute("value", "您有一篇新訊息【" + value.data.title + "】");
+                        // button1.onclick = function(){
+                        //     if(value.data.status != 'deleteArticle'){
+                        //         if(value.data.status == 'addChannel'){
+                        //             showChannelContent(value.data.channelsId, value.id, 'Y');
+                        //         }else{
+                        //             showArticleContent(value.data.articlesId, value.id, 'Y');
+                        //         }
+                        //     }
+                        // }
 
                         div2.appendChild(button1);
 

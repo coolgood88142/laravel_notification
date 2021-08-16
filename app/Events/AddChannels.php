@@ -16,20 +16,20 @@ class AddChannels
 
     public $user;
     public $title;
-    public $channelsId;
-    public $status;
+    public $typeId;
+    public $type;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($user, $title, $channelsId)
+    public function __construct($user, $title, $typeId)
     {
         $this->user = $user;
         $this->title = $title;
-        $this->channelsId = $channelsId;
-        $this->status = 'addChannel';
+        $this->typeId = $typeId;
+        $this->type = 'addChannel';
     }
 
     /**

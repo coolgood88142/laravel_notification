@@ -16,13 +16,12 @@ class NewNotification extends Notification
      *
      * @return void
      */
-    public function __construct($user, $title, $id, $status)
+    public function __construct($user, $title, $typeId, $type)
     {
         $this->user = $user;
         $this->title = $title;
-        $this->articlesId = $id;
-        $this->channelsId = $id;
-        $this->status = $status;
+        $this->typeId = $typeId;
+        $this->type = $type;
     }
 
     /**
@@ -58,19 +57,12 @@ class NewNotification extends Notification
      */
     public function toArray($notifiable)
     {
-        $status = $this->status;
-        $data = [
-            'name' => $notifiable->name,
-            'email' => $notifiable->email,
-            'title' => $this->title,
-            'status' => $this->status
-        ];
 
-        if($status != 'addChannel'){
-            $data['articlesId'] = $this->articlesId;
-        }else{
-            $data['channelsId'] = $this->channelsId;
-        }
+        $data = [
+            'title' => $this->title,
+            'type' => $this->type,
+            'typeId' => $this->typeId
+        ];
 
         return $data;
     }

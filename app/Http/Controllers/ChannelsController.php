@@ -15,6 +15,7 @@ class ChannelsController extends Controller
     public $name;
     public $channelsId;
 
+    //顯示新增頻道畫面
     public function showAddChannels(Request $request)
     {
         $userId = $request->userId;
@@ -26,6 +27,7 @@ class ChannelsController extends Controller
         ]);
     }
 
+    //新增頻道
     public function addChannels(Request $request)
     {
         $userId = $request->userId;
@@ -69,42 +71,23 @@ class ChannelsController extends Controller
         {   
             event(new AddChannels($users,  $this->name, $this->channelsId));
 
-            $notification = $user->notifications()->where('data->status', '=', 'addChannel')->first();
+            $notification = $user->notifications()->where('data->type', '=', 'addChannel')->first();
             $data['message'] = '您有一篇新訊息【' . $name. '】';
             $data['userData'] =  [
                 'userId' => $user->id,
                 'channelsId' => $channelsId,
                 'notificationId' => $notification->id,
                 'isRead' => 'N',
-                'status' => 'addChannel'
+                'type' => 'addChannel'
             ];
-
-            // // event(new SendMessage($data));
             $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
             event(new RedisMessage($data));
         });
 
-        // foreach (\App\User::cursor() as $user) {
-        //     event(new AddChannels($user,  $name, $channelsId));
-
-        //     $notification = $user->notifications()->where('data->status', '=', 'addChannel')->first();
-        //     $data['message'] = '您有一篇新訊息【' . $name. '】';
-        //     $data['userData'] =  [
-        //         'userId' => $user->id,
-        //         'channelsId' => $channelsId,
-        //         'notificationId' => $notification->id,
-        //         'isRead' => 'N',
-        //         'status' => 'addChannel'
-        //     ];
-
-        //     // // event(new SendMessage($data));
-        //     $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
-        //     event(new RedisMessage($data));
-        // }
-
         return redirect()->route('showAritcles');
     }
 
+    //顯示單個頻道中，所有的文章資料
     public function showChannelContent(Request $request)
     {
         $userId = $request->userId;

@@ -2,18 +2,18 @@
 
 namespace App\Listeners;
 
-use App\Events\AddArticles;
-use App\Events\AddComment;
+use App\Events\AddChannels;
 use App\Events\DeleteArticles;
+use App\Events\AddComment;
 use App\Notifications\NewNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Notification;
 
-class SendArticlesUser implements ShouldQueue
+
+class NewArticle implements ShouldQueue
 {
     use InteractsWithQueue;
-
     /**
      * Create the event listener.
      *
@@ -27,24 +27,11 @@ class SendArticlesUser implements ShouldQueue
     /**
      * Handle the event.
      *
-     * @param   $event
+     * @param $event
      * @return void
      */
     public function handle($event)
     {
-        $id = '';
-        $users = $event->user;
-
-        foreach($users as $user){
-            if($event->status != 'addChannel'){
-                $id = $event->articlesId;
-            }else{
-                $id = $event->channelsId; 
-            }
-    
-            Notification::send($user, new NewNotification($user, $event->title, $id, $event->status));
-        }
-
-       
+        Notification::send($event->user, new NewNotification($event->user, $event->title, $event->typeId, $event->type));
     }
 }
