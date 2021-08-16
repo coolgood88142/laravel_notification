@@ -7,11 +7,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use App\Events\AddComment;
 use App\Events\RedisMessage;
+use App\Events\SendMessage;
 use App\Models\Articles;
 use App\Models\Comment;
 use App\User;
 use Carbon\Carbon;
 use Pusher\Pusher;
+use Auth;
 
 class CommentController extends Controller
 {
@@ -76,21 +78,29 @@ class CommentController extends Controller
                 )
             );
 
-            foreach($users as $user){
-                $notification = $user->notifications()->where('data->status', '=', 'addComment')->first();
+            // $notification = $user->notifications()->where('data->status', '=', 'addComment')->first();
+            set_time_limit(0);
+            $data['message'] = '您有一篇新訊息【' . $title. '】';
+            $data['userData'] = [
+                'userId' => Auth::id(),
+                'articleId' => $articleId,
+                // 'notificationId' => $notification->id,
+                'isRead' => 'N',
+                'status' => 'addComment'
+            ];
 
-                $data['message'] = '您有一篇新訊息【' . $title. '】';
-                $data['userData'] = [
-                    'userId' => $user->id,
-                    'articleId' => $articleId,
-                    'notificationId' => $notification->id,
-                    'isRead' => 'N',
-                    'status' => 'addComment'
-                ];
-                $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
-                event(new RedisMessage($data));
+            $data['users'] = $users;
+
+            //怎麼從10000個送到前端時，去只到對應的channel
+
+            event(new SendMessage($data));
+            // $pusher->trigger('article-channel' . Auth::id(), 'App\\Events\\SendMessage', $data);
+            // event(new RedisMessage($data));
+
+            // foreach($users as $user){
+                
     
-            }
+            // }
 
             $comment = new Comment();
             $comment->user_id = $userId;

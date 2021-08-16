@@ -144,34 +144,124 @@
     <script src="{{ url('/js/laravel-echo-setup.js') }}" type="text/javascript"></script>
     <script>
         $(document).ready(function() {
-            var i = 0;
-            window.Echo.channel('article-channel' + $('#userId').val())
-            .listen('.SendMessage', (data) => {
-                console.log(data.userData);
-                let message = data.message;
-                let notification = document.getElementsByName('notification')[0];
-                let copy = notification.cloneNode(true);
+            showNotification();
+            window.Echo.channel('article-channel')
+            .listen('.RedisMessage', (data) => {
+                let userId = $('#userId').val();
+                let users = data.users;
+                // let id = users.indexOf(userId);
+                
+                let index = $.map(users, function(item, value) {
+                    return item.id.toString();
+                }).indexOf(userId);
 
-                let div1 =  document.createElement("div");
-                div1.setAttribute("name", "notification");
-                div1.setAttribute("class", "row");
+                if(index != -1){
+                    $.ajax({
+                        url: '/getNotificationData', 
+                        type: 'POST',
+                        data:{
+                            'id' : users[index].id,
+                            'status' : data.userData.status,
+                            '_token':'{{csrf_token()}}'
+                        },
+                        success: function(result){
+                            let message = data.message;
+                            let notification = document.getElementsByName('notification')[0];
+                            let copy = notification.cloneNode(true);
 
-                if(data.userData.status == 'deleteArticle'){
-                    div1.innerHTML = "<div class='col-8'><input type='button' class='list-group-item list-group-item-action text-danger'"
-                        + " value='" + message + "' /></div>"
-                        + " <div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀' onClick=readArticles(this" + ",'" + data.userData.notificationId + "'" + ") />" + "</div></div> ";
-                }else{
-                    div1.innerHTML = "<div class='col-8'><input type='button' class='list-group-item list-group-item-action text-danger'"
-                        + " value='" + message + "'  onClick=showArticleContent('" + data.userData.articleId + "',"+"'" + data.userData.notificationId + "'," + "'N'" + ") /></div>"
-                        + " <div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀' onClick=readArticles(this" + ",'" + data.userData.notificationId + "'" + ") />" + "</div></div> ";
+                            let div1 =  document.createElement("div");
+                            div1.setAttribute("name", "notification");
+                            div1.setAttribute("class", "row");
+
+                            let div2 =  document.createElement("div");
+                            div2.setAttribute("class", "col-8");
+
+                            let button1  =  document.createElement("input");
+                            button1.setAttribute("type", "button");
+                            button1.setAttribute("class", "list-group-item list-group-item-action text-danger");
+                            button1.setAttribute("value", message);
+                            button1.onclick = function(){
+                                if(data.userData.status != 'deleteArticle'){
+                                    if(data.userData.status == 'addChannel'){
+                                        showChannelContent(data.userData.channelsId, value.id, 'Y');
+                                    }else{
+                                        showArticleContent(data.userData.articlesId, value.id, 'Y');
+                                    }
+                                }
+                            }
+
+                            div2.appendChild(button1);
+
+                            let div3 =  document.createElement("div");
+                            div3.setAttribute("class", "col-4");
+
+                            let button2 =  document.createElement("input");
+                            button2.setAttribute("type", "button");
+                            button2.setAttribute("class", "btn btn-primary");
+                            button2.setAttribute("name", "read");
+                            button2.setAttribute("value", "已閱讀");
+                            button2.onclick = function(){
+                                readArticles(this, result.notificationId);
+                            }
+
+                            if(result.read_at != null){
+                                button2.disabled = true;
+                            }
+
+                            div3.appendChild(button2);
+
+                            div1.appendChild(div2);
+                            div1.appendChild(div3);
+
+                            let html = $('#notificationRaw').html();
+                            $('#notificationRaw').empty();
+                            $('#notificationRaw').append(div1);
+                            $('#notificationRaw').append(html);
+                            
+
+                            // if(data.userData.status == 'deleteArticle'){
+                            //     div1.innerHTML = "<div class='col-8'><input type='button' class='list-group-item list-group-item-action text-danger'"
+                            //         + " value='" + message + "' /></div>"
+                            //         + " <div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀' onClick=readArticles(this" + ",'" + result.notificationId + "'" + ") />" + "</div></div> ";
+                            // }else{
+                            //     div1.innerHTML = "<div class='col-8'><input type='button' class='list-group-item list-group-item-action text-danger'"
+                            //         + " value='" + message + "'  onClick=showArticleContent('" + data.userData.articleId + "',"+"'" + result.notificationId + "'," + "'N'" + ") /></div>"
+                            //         + " <div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀' onClick=readArticles(this" + ",'" + result.notificationId + "'" + ") />" + "</div></div> ";
+                            // }
+
+                            // let html = $('#notificationRaw').html();
+                            // $('#notificationRaw').empty();
+                            // $('#notificationRaw').append(div1);
+                            // $('#notificationRaw').append(html);
+
+                        },
+                        error:function(xhr, status, error){
+                            alert(xhr.statusText);
+                        }
+                    });
                 }
-
-                let html = $('#notificationRaw').html();
-                $('#notificationRaw').empty();
-                $('#notificationRaw').append(div1);
-                $('#notificationRaw').append(html);
             });
         });
+
+        function getNotificationData(user, status){
+            let data = [];
+            $.ajax({
+				url: '/getNotificationData', 
+				type: 'POST',
+				data:{
+                    'user' : user,
+					'status' : status,
+					'_token':'{{csrf_token()}}'
+				},
+				success: function(result){
+                    return result;
+                },
+				error:function(xhr, status, error){
+					alert(xhr.statusText);
+				}
+			});
+            return data;
+        }
 
         function showNotification(){
             $.ajax({
@@ -190,27 +280,45 @@
                         div1.setAttribute("name", "notification");
                         div1.setAttribute("class", "row");
 
-                        if(value.data.status != 'delete'){
-                            if(value.read_at != null){
-                                div1.innerHTML = "<div class='col-8'><input type='button' class='list-group-item list-group-item-action'"
-                                    + " value='您有一篇新訊息【" + value.data.title + "】'  onClick=showArticleContent('" + value.data.categoryId + "',"+"'" + value.id + "'," + "'Y'" + ") /></div>"
-                                    + " <div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀' onClick=readArticles(this" + ",'" + value.id + "'" + ") disabled />" + "</div></div> ";
-                            }else{
-                                div1.innerHTML = "<div class='col-8'><input type='button' class='list-group-item list-group-item-action'"
-                                    + " value='您有一篇新訊息【" + value.data.title + "】'  onClick=showArticleContent('" + value.data.categoryId + "',"+"'" + value.id + "'," + "'N'" + ") /></div>"
-                                    + " <div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀' onClick=readArticles(this" + ",'" + value.id + "'" + ") disabled />" + "</div></div> ";
-                            }
-                        }else{
-                            if(value.read_at != null){
-                                div1.innerHTML = "<div class='col-8'><input type='button' class='list-group-item list-group-item-action'"
-                                    + " value='您有一篇新訊息【" + value.data.title + "】'  onClick=showArticleContent('" + value.data.categoryId + "',"+"'" + value.id + "'," + "'Y'" + ") /></div>"
-                                    + " <div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀' onClick=readArticles(this" + ",'" + value.id + "'" + ") />" + "</div></div> ";
-                            }else{
-                                div1.innerHTML = "<div class='col-8'><input type='button' class='list-group-item list-group-item-action'"
-                                    + " value='您有一篇新訊息【" + value.data.title + "】'  onClick=showArticleContent('" + value.data.categoryId + "',"+"'" + value.id + "'," + "'N'" + ") /></div>"
-                                    + " <div class='col-4'><input type='button' class='btn btn-primary' name='read' value='已閱讀' onClick=readArticles(this" + ",'" + value.id + "'" + ") />" + "</div></div> ";
+                        let div2 =  document.createElement("div");
+                        div2.setAttribute("class", "col-8");
+
+                        let button1 =  document.createElement("input");
+                        button1.setAttribute("type", "button");
+                        button1.setAttribute("class", "list-group-item list-group-item-action");
+                        button1.setAttribute("value", "您有一篇新訊息【" + value.data.title + "】");
+                        button1.onclick = function(){
+                            if(value.data.status != 'deleteArticle'){
+                                if(value.data.status == 'addChannel'){
+                                    showChannelContent(value.data.channelsId, value.id, 'Y');
+                                }else{
+                                    showArticleContent(value.data.articlesId, value.id, 'Y');
+                                }
                             }
                         }
+
+                        div2.appendChild(button1);
+
+                        let div3 =  document.createElement("div");
+                        div3.setAttribute("class", "col-4");
+
+                        let button2 =  document.createElement("input");
+                        button2.setAttribute("type", "button");
+                        button2.setAttribute("class", "btn btn-primary");
+                        button2.setAttribute("name", "read");
+                        button2.setAttribute("value", "已閱讀");
+                        button2.onclick = function(){
+                            readArticles(this, value.id);
+                        }
+
+                        if(value.read_at != null){
+                            button2.disabled = true;
+                        }
+
+                        div3.appendChild(button2);
+
+                        div1.appendChild(div2);
+                        div1.appendChild(div3);
 
                         $('#notificationRaw').append(div1);
                     });

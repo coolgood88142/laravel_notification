@@ -61,7 +61,10 @@ Route::get('/addChannels', 'ChannelsController@showAddChannels');
 
 Route::post('/addChannels', 'ChannelsController@addChannels');
 
-Route::get('showChannelContent', 'ChannelsController@showChannelContent')->name('showCannelsContent');
+Route::get('/showChannelContent', 'ChannelsController@showChannelContent')->name('showCannelsContent');
+
+Route::post('/getNotificationData', 'ArticlesController@getNotificationData');
+Route::get('/getNotificationData', 'ArticlesController@getNotificationData');
 
 Route::get('test', function () {
     event(new App\Events\MyEvent('hello world'));

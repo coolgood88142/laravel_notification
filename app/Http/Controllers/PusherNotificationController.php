@@ -35,20 +35,38 @@ class PusherNotificationController extends Controller
                 $sendNotice = $article->send_notice;
 
                 if($sendNotice == 'Y'){
-                    foreach (\App\User::cursor() as $user) {
-                        $notification = $user->notifications()->where('data->status', '=', 'addArticle')->first();
-                    
+                    \App\User::chunk(10000, function($users)
+                    {   
+                        $title = $this->title;
+                        $id = $this->id;
+                        event(new DeleteArticles($users, $title, $id));
+                        
                         $data['message'] = '您有一篇新訊息【' . $title. '】';
                         $data['userData'] =  [
-                            'userId' => Auth::id(),
                             'articleId' => $id,
-                            'notificationId' => $notification->id,
                             'isRead' => 'N',
                             'status' => 'addArticle'
                         ];
 
+                        $data['users'] = $users;
                         $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
-                    };
+                        event(new RedisMessage($data));
+                    });
+
+                    // foreach (\App\User::cursor() as $user) {
+                    //     $notification = $user->notifications()->where('data->status', '=', 'addArticle')->first();
+                    
+                    //     $data['message'] = '您有一篇新訊息【' . $title. '】';
+                    //     $data['userData'] =  [
+                    //         'userId' => Auth::id(),
+                    //         'articleId' => $id,
+                    //         'notificationId' => $notification->id,
+                    //         'isRead' => 'N',
+                    //         'status' => 'addArticle'
+                    //     ];
+
+                    //     $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
+                    // };
                 }
                 
             }

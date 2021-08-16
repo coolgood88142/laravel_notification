@@ -238,25 +238,42 @@ class ArticlesController extends Controller
             // $user =  User::where('id % 2', '=', $even);
             
             set_time_limit(0);
-
-            $userData = [];
-            foreach (\App\User::cursor() as $user) {
-                event(new DeleteArticles($user, $title, $id));
-                
-                $notification = $user->notifications()->where('data->status', '=', 'deleteArticle')->first();
+            \App\User::chunk(10000, function($users)
+            {   
+                $title = $this->title;
+                $id = $this->id;
+                event(new DeleteArticles($users, $title, $id));
                 
                 $data['message'] = '您有一篇新訊息【' . $title. '】';
                 $data['userData'] =  [
-                    'userId' => $user->id,
                     'articleId' => $id,
-                    'notificationId' => $notification->id,
                     'isRead' => 'N',
                     'status' => 'deleteArticle'
                 ];
 
-                $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
+                $data['users'] = $users;
+                $pusher->trigger('article-channel' . $id, 'App\\Events\\SendMessage', $data);
                 event(new RedisMessage($data));
-            };
+            });
+
+            // $userData = [];
+            // foreach (\App\User::cursor() as $user) {
+            //     event(new DeleteArticles($user, $title, $id));
+                
+            //     $notification = $user->notifications()->where('data->status', '=', 'deleteArticle')->first();
+                
+            //     $data['message'] = '您有一篇新訊息【' . $title. '】';
+            //     $data['userData'] =  [
+            //         'userId' => $user->id,
+            //         'articleId' => $id,
+            //         'notificationId' => $notification->id,
+            //         'isRead' => 'N',
+            //         'status' => 'deleteArticle'
+            //     ];
+
+            //     $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
+            //     event(new RedisMessage($data));
+            // };
 
             
 
@@ -303,28 +320,35 @@ class ArticlesController extends Controller
         $notifications = $user->notifications->take($count);
         $datetime = Carbon::now()->setTimezone('Asia/Taipei')->toDateTimeString();
         $notificationsArray = [];
-        foreach($notifications as $notification){
-            $array = [ 
-                'id' => $notification->id,
-                'title' => $notification->data['title'],
-                'status' => $notification->data['status'],
-                'articlesId' => $notification->data['articlesId'],
-                'read' => $notification->read(),
-                'notThreeDay' => ceil((strtotime($notification->created_at) - strtotime($datetime))/86400) < 3
-            ];
-            array_push($notificationsArray, $array);
-        }
+        
         $articles = Articles::orderBy('id')->get();
+        $channels = Channels::orderBy('id')->get();
     
         $data = [
             'notifications' => $notificationsArray,
             'notificationsCount' => $count,
             'articles' => $articles,
+            'channels' => $channels,
             'userId' => $id,
             'datetime' => $datetime,
         ];
 
         return view('articlesRedis', $data);
+    }
+
+    public function getNotificationData(Request $request)
+    {
+        $id = $request->id;
+        $status = $request->status;
+        $user = User::where('id', '=', $id)->first();
+        // $status = 'addComment';
+        $notification = $user->notifications()->where('data->status', '=', $status)->first();
+
+        return [
+            'userId' => $user->id,
+            'notificationId' => $notification->id,
+            'read_at' => $user->read_at
+        ];
     }
     
     public function showAdd(Request $request)
