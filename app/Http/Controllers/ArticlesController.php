@@ -71,16 +71,16 @@ class ArticlesController extends Controller
         $this->id = $id;
 
         //判斷新增後的title和id不為null或空白
-        if($title != null && $title != '' && $id != null && $id != ''){
-            //執行事件傳訊息，顯示有一篇新文章
-            set_time_limit(0);
-            \App\User::chunk(10000, function($users)
-            {   
-                $title = $this->title;
-                $id = $this->id;
-                event(new AddArticles($users, '新文章:' . $title, $id));
-            });
-        }
+        // if($title != null && $title != '' && $id != null && $id != ''){
+        //     //執行事件傳訊息，顯示有一篇新文章
+        //     set_time_limit(0);
+        //     \App\User::chunk(10000, function($users)
+        //     {   
+        //         $title = $this->title;
+        //         $id = $this->id;
+        //         event(new AddArticles($users, '新文章:' . $title, $id));
+        //     });
+        // }
 
         return redirect()->route('showAritcles');
     }

@@ -95,9 +95,9 @@ class CommentController extends Controller
 
             //怎麼從10000個送到前端時，去只到對應的channel
 
-            event(new SendMessage($data));
-            // $pusher->trigger('article-channel' . Auth::id(), 'App\\Events\\SendMessage', $data);
-            // event(new RedisMessage($data));
+            // event(new SendMessage($data));
+            $pusher->trigger('article-channel' . Auth::id(), 'App\\Events\\SendMessage', $data);
+            event(new RedisMessage($data));
 
             // foreach($users as $user){
                 
