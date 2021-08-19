@@ -101,7 +101,7 @@
                                 @endif
                             @else
                             @if (Auth::check())
-                                <lesson_notification :lessons="{{ auth()->user()->unreadNotifications }}"></lesson_notification> 
+                                <lesson_notification :notifications-length="{{ auth()->user()->unreadNotifications->count() }}" :message="message"></lesson_notification> 
                             @endif
                                 <li class="nav-item dropdown">
                                     <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
@@ -174,6 +174,7 @@
                             <div class="form-group">
                                 <input type="hidden" id="userId" name="userId" value="{{ $userId }}">
                                 <input type="hidden" id="notificationsCount" name="notificationsCount" value={{ $notificationsCount }}>
+                                <input type="hidden" id="message" name="message">
                             </div>
                         </div>
                     </div>
@@ -183,7 +184,7 @@
     </div>
     <script src="{{mix('js/app.js')}}"></script>
 	<script src="{{mix('js/edit.js')}}"></script>
-    <script src="./js/lessonNotification.js"></script>
+    <script src="./js/notification.js"></script>
     <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
     <script>
         $(document).ready(function() {

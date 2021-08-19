@@ -97,7 +97,7 @@ class CommentController extends Controller
 
             // event(new SendMessage($data));
             $pusher->trigger('article-channel' . Auth::id(), 'App\\Events\\SendMessage', $data);
-            event(new RedisMessage($data));
+            // event(new RedisMessage($data));
 
             // foreach($users as $user){
                 

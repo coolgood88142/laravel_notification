@@ -1,21 +1,22 @@
 <template>
     <li class="nav-item dropdown">
         <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" 
-            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                v-on:click="defaultNotification()">
                 通知 <span class="badge badge-danger" id="count-notification">
-                    {{ lessons.length }}</span>
+                    {{ notificationsLength }}</span>
                 <span class="caret"></span>
         </a>
-        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" v-for="(lesson, index) in lessons" :key="index">
-                {{ lesson.data.title }}
+        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown" @mousewheel="wheel" style="height: 110px; overflow-y: scroll;">
+            <a class="dropdown-item" v-for="(notification, index) in notifications" :key="index">
+                {{ notification.data.title }}
             </a>
 
-            <a class="dropdown-item" v-if="lessons.length != 0"  onClick="showNotification()">
+            <!-- <a class="dropdown-item" v-if="lessons.length != 0"  onClick="showThreeNotification()">
                 更多
-            </a>
+            </a> -->
 
-            <a class="dropdown-item" v-if="lessons.length == 0">
+            <a class="dropdown-item" v-if="notifications.length == 0">
                 沒通知訊息
             </a>
         </div>
@@ -23,52 +24,44 @@
 </template>
 <script>
 export default {
-    props: ['lessons'],
+    props: ['notificationsLength', 'message'],
+    data(){
+        return {
+            'count': 3,
+            'nowCount': 0,
+            'page' : 1,
+            'scroll' : 0,
+            'notifications' : [],
+        }
+    },
     methods: {
-        showNotification(){
-            $.ajax({
-				url: '/showNotification', 
-				type: 'POST',
-				data:{
-                    'nowCount' : $("div[name='notification']").length,
-					'count' : $('#notificationsCount').val(),
-					'_token':'{{csrf_token()}}'
-				},
-				success: function(result){
-                    
-                    console.log(result);
-                    $.each(result, function(index, value) {
+        defaultNotification(){
+            this.page = 1;
+            this.showThreeNotification();
+        },
+        showThreeNotification(){
+            let url = './showNotification'
+            let params = {
+                'page' : this.page,
+            }
 
-                        let html = 
-                            '<div name="notification" class="row">' +
-                                '<div class="col-8">' +
-                                    '<input type="button" class="list-group-item list-group-item-action" value="' + value.data.title + '"';
-                                    if(value.data.status == 'addChannel'){
-                                        html += ' onclick="showChannelContent('+value.data.id+', '+value.id+', '+'Y'+')">';
-                                    }else{
-                                        html += ' onclick="showArticleContent('+value.data.id+', '+value.id+', '+'Y'+')">';
-                                    }
+            axios.post(url, params).then((response) => {
+                if(response.data.length != 0){
+                    let dataArray = Object.values(response.data);
+                    let array = this.notifications;
+                    this.notifications = array.concat(dataArray);
+                    this.page++;
+                }
+				
+			}).catch((error) => {
 
-                            html += '</div>' +
-                                '<div class="col-4">';
-                                 if(value.data.status != 'deleteArticle'){
-                                    html += '<input type="button" class="btn btn-primary" name="read" value="已閱讀"  onclick="readArticles(this, '+value.id+')"';
-                                    if(value.read_at != null){
-                                        html += 'disabled';
-                                    }
-                                }
-
-                            html += '>'+
-                                '</div>'+
-                            '</div>';
-                        
-                        $('#notificationRaw').append(html);
-                    });
-				},
-				error:function(xhr, status, error){
-					alert(xhr.statusText);
-				}
-			});
+            });
+        },
+        wheel(e){
+            if(e.deltaY == 100){
+                console.log(this.page);
+                this.showThreeNotification();
+            }
         }
     }
 }

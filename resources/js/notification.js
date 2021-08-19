@@ -6,4 +6,7 @@ let app = new Vue({
     components: {
 		"lesson_notification": lessonNotification,
 	},
+	data:{
+		"message": $('#message').val()
+	}
 })

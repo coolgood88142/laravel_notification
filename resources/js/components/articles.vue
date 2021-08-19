@@ -25,6 +25,26 @@ export default {
 		},
 	},
     methods: {
+        deleteArtcle(){
+            $.ajax({
+				url: '/deleteArticles', 
+				type: 'POST',
+				data:{
+					"id" : id,
+                    "isEven" : id % 2 == 0 ? true : false,
+					'_token':'{{csrf_token()}}'
+				},
+				success: function(result){
+                    //點選已讀之後，按鈕要新增disabled
+                    if(result.trim() == 'success'){
+                        $(el).parent().parent().remove();
+                    }
+				},
+				error:function(xhr, status, error){
+					alert(xhr.statusText);
+				}
+			});
+        }
     }
 }
 </script>

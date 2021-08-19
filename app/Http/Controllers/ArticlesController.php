@@ -223,8 +223,16 @@ class ArticlesController extends Controller
 
     //通知列表-顯示全部的通知
     public function showNotification(Request $request){
-        $nowCount = $request->nowCount;
-        $count = $request->count;
+        $page = $request->page;
+
+        if($page != null && $page != ''){
+            $nowCount = ($page - 1) * 3 + 1;
+            $count = $page * 3;
+        }else{
+            $nowCount = $request->nowCount;
+            $count = $request->count;
+        }
+
         $id = Auth::id();
         $user = \App\User::where('id', '=', $id)->first();
         $newNotification = $user->notifications->skip($nowCount)->take($count);
