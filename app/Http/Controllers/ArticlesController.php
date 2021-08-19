@@ -67,20 +67,20 @@ class ArticlesController extends Controller
         $articles->save();
         $title = $articles->title;
         $id = $articles->id;
-        $this->title = $title;
+        $this->title = '您有一篇新訊息【新文章:' . $title . '】';
         $this->id = $id;
 
         //判斷新增後的title和id不為null或空白
-        // if($title != null && $title != '' && $id != null && $id != ''){
-        //     //執行事件傳訊息，顯示有一篇新文章
-        //     set_time_limit(0);
-        //     \App\User::chunk(10000, function($users)
-        //     {   
-        //         $title = $this->title;
-        //         $id = $this->id;
-        //         event(new AddArticles($users, '新文章:' . $title, $id));
-        //     });
-        // }
+        if($title != null && $title != '' && $id != null && $id != ''){
+            //執行事件傳訊息，顯示有一篇新文章
+            set_time_limit(0);
+            \App\User::chunk(10000, function($users)
+            {   
+                $title = $this->title;
+                $id = $this->id;
+                event(new AddArticles($users, $title, $id));
+            });
+        }
 
         return redirect()->route('showAritcles');
     }
@@ -180,7 +180,7 @@ class ArticlesController extends Controller
         $status = 'success';
         try{
             $articles = Articles::where('id', '=', $id)->first();
-            $title = $articles->title . '已刪除';
+            $title = '您有一篇新訊息【' . $articles->title . '已刪除】';
             $articles->delete();
             $even = $isEven ? '0' : '1';
 
@@ -203,7 +203,7 @@ class ArticlesController extends Controller
                 $id = $this->id;
                 event(new DeleteArticles($users, $title, $id));
                 
-                $data['message'] = '您有一篇新訊息【' . $title. '】';
+                $data['message'] =  $title;
                 $data['userData'] =  [
                     'articleId' => $id,
                     'isRead' => 'N',
@@ -243,7 +243,7 @@ class ArticlesController extends Controller
 
             if($sendNotice == 'Y'){
                 foreach (\App\User::cursor() as $user) {
-                    event(new AddArticles($user, '新文章:' . $title, $id));
+                    event(new AddArticles($user, '您有一篇新訊息【新文章:' . $title . '】', $id));
                 };
             }
             

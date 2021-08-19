@@ -46,7 +46,7 @@ class CommentController extends Controller
         $userId = $request->userId;
         $articleId = $request->articleId;
         $text = $request->InputComment;
-        $title = $request->title . '有一則新留言';
+        $title = '您有一篇新訊息【有一則新留言' . $text. '】';
 
         $status = 'success';
         try{
@@ -82,7 +82,7 @@ class CommentController extends Controller
 
             // $notification = $user->notifications()->where('data->status', '=', 'addComment')->first();
             set_time_limit(0);
-            $data['message'] = '您有一篇新訊息【' . $title. '】';
+            $data['message'] = $title;
             $data['userData'] = [
                 'userId' => Auth::id(),
                 'articleId' => $articleId,

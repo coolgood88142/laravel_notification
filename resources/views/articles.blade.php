@@ -72,15 +72,65 @@
 <body>
     <div class="container">
         <div id="app" class="justify-content-center align-items-center">
+            <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
+                <div class="container">
+                    <a class="navbar-brand" href="{{ url('/') }}">
+                        {{ config('app.name', 'Laravel') }}
+                    </a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+    
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <!-- Left Side Of Navbar -->
+                        <ul class="navbar-nav mr-auto">
+    
+                        </ul>
+    
+                        <!-- Right Side Of Navbar -->
+                        <ul class="navbar-nav ml-auto">
+                            <!-- Authentication Links -->
+                            @guest
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
+                                </li>
+                                @if (Route::has('register'))
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
+                                    </li>
+                                @endif
+                            @else
+                            @if (Auth::check())
+                                <lesson_notification :lessons="{{ auth()->user()->unreadNotifications }}"></lesson_notification> 
+                            @endif
+                                <li class="nav-item dropdown">
+                                    <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                                        {{ Auth::user()->name }} <span class="caret"></span>
+                                    </a>
+    
+                                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                                        <a class="dropdown-item" href="{{ route('logout') }}"
+                                           onclick="event.preventDefault();
+                                                         document.getElementById('logout-form').submit();">
+                                            {{ __('Logout') }}
+                                        </a>
+    
+                                        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                                            @csrf
+                                        </form>
+                                    </div>
+                                </li>
+                            @endguest
+                        </ul>
+                    </div>
+                </div>
+            </nav>
             <div class="row" style="margin-bottom: 60px;">
                 <div class="col">
                     <h2 id="title" class="text-center font-weight-bold" style="margin-bottom:20px;">文章資訊</h2>
                     <div class="card">
                         <div class="card-body">
                             <div class="form-group">
-                                <div id="showPusher">
-                                    
-                                </div>
                                 <div class="card-header">
                                     通知列表
                                     <input type="button" class="btn btn-primary" name="readAll" value="已閱讀全部"
@@ -133,6 +183,7 @@
     </div>
     <script src="{{mix('js/app.js')}}"></script>
 	<script src="{{mix('js/edit.js')}}"></script>
+    <script src="./js/lessonNotification.js"></script>
     <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
     <script>
         $(document).ready(function() {
@@ -144,8 +195,8 @@
                 encrypted: true
             });
 
-            window.Echo.private('article-channel' + $('#userId').val())
-            .listen('.SendMessage', (data) => {
+            var channel = pusher.subscribe('article-channel');
+            channel.bind('App\\Events\\SendMessage', function(data) {
                 let userId = $('#userId').val()
                 let users = data.users;
                 // let id = users.indexOf(userId);
@@ -165,6 +216,32 @@
                         },
                         success: function(result){
                             let message = data.message;
+
+                        //     let html = 
+                        //     '<div name="notification" class="row">' +
+                        //         '<div class="col-8">' +
+                        //             '<input type="button" class="list-group-item list-group-item-action" value="' + message + '"';
+                        //             if(data.userData.status == 'addChannel'){
+                        //                 html += ' onclick="showChannelContent('+value.data.id+', '+value.id+', '+'Y'+')">';
+                        //             }else{
+                        //                 html += ' onclick="showArticleContent('+value.data.id+', '+value.id+', '+'Y'+')">';
+                        //             }
+
+                        //     html += '</div>' +
+                        //         '<div class="col-4">';
+                        //          if(data.userData.status != 'deleteArticle'){
+                        //             html += '<input type="button" class="btn btn-primary" name="read" value="已閱讀"  onclick="readArticles(this, '+result.notificationId+')"';
+                        //             if(value.read_at != null){
+                        //                 html += 'disabled';
+                        //             }
+                        //         }
+
+                        //     html += '>'+
+                        //         '</div>'+
+                        //     '</div>';
+                        
+                        // $('#notificationRaw').append(html);
+
                             let notification = document.getElementsByName('notification')[0];
                             let copy = notification.cloneNode(true);
 
@@ -175,21 +252,21 @@
                             let div2 =  document.createElement("div");
                             div2.setAttribute("class", "col-8");
 
-                            let button1  =  document.createElement("input");
-                            button1.setAttribute("type", "button");
-                            button1.setAttribute("class", "list-group-item list-group-item-action text-danger");
-                            button1.setAttribute("value", message);
-                            button1.onclick = function(){
-                                if(data.userData.status != 'deleteArticle'){
+                            if(data.userData.status != 'deleteArticle'){
+                                let button1  =  document.createElement("input");
+                                button1.setAttribute("type", "button");
+                                button1.setAttribute("class", "list-group-item list-group-item-action text-danger");
+                                button1.setAttribute("value", message);
+                                button1.onclick = function(){
                                     if(data.userData.status == 'addChannel'){
                                         showChannelContent(data.userData.channelsId, value.id, 'Y');
                                     }else{
                                         showArticleContent(data.userData.articlesId, value.id, 'Y');
                                     }
                                 }
-                            }
 
-                            div2.appendChild(button1);
+                                div2.appendChild(button1);
+                            }
 
                             let div3 =  document.createElement("div");
                             div3.setAttribute("class", "col-4");
@@ -239,65 +316,31 @@
                     
                     console.log(result);
                     $.each(result, function(index, value) {
-                        let button = document.getElementsByClassName("list-group-item list-group-item-action");
-                        let buttonCopy = button.cloneNode(true);
-                        buttonCopy.setAttribute("value", "您有一篇新訊息【" + value.data.title + "】");
-                        buttonCopy.onclick = function(){
-                            if(value.data.status != 'deleteArticle'){
-                                if(value.data.status == 'addChannel'){
-                                    showChannelContent(value.data.channelsId, value.id, 'Y');
-                                }else{
-                                    showArticleContent(value.data.articlesId, value.id, 'Y');
+
+                        let html = 
+                            '<div name="notification" class="row">' +
+                                '<div class="col-8">' +
+                                    '<input type="button" class="list-group-item list-group-item-action" value="' + value.data.title + '"';
+                                    if(value.data.status == 'addChannel'){
+                                        html += ' onclick="showChannelContent('+value.data.id+', '+value.id+', '+'Y'+')">';
+                                    }else{
+                                        html += ' onclick="showArticleContent('+value.data.id+', '+value.id+', '+'Y'+')">';
+                                    }
+
+                            html += '</div>' +
+                                '<div class="col-4">';
+                                 if(value.data.status != 'deleteArticle'){
+                                    html += '<input type="button" class="btn btn-primary" name="read" value="已閱讀"  onclick="readArticles(this, '+value.id+')"';
+                                    if(value.read_at != null){
+                                        html += 'disabled';
+                                    }
                                 }
-                            }
-                        }
 
-
-                        let div1 =  document.createElement("div");
-                        div1.setAttribute("name", "notification");
-                        div1.setAttribute("class", "row");
-
-                        let div2 =  document.createElement("div");
-                        div2.setAttribute("class", "col-8");
-
-                        // let button1 =  document.createElement("input");
-                        // button1.setAttribute("type", "button");
-                        // button1.setAttribute("class", "list-group-item list-group-item-action");
-                        // button1.setAttribute("value", "您有一篇新訊息【" + value.data.title + "】");
-                        // button1.onclick = function(){
-                        //     if(value.data.status != 'deleteArticle'){
-                        //         if(value.data.status == 'addChannel'){
-                        //             showChannelContent(value.data.channelsId, value.id, 'Y');
-                        //         }else{
-                        //             showArticleContent(value.data.articlesId, value.id, 'Y');
-                        //         }
-                        //     }
-                        // }
-
-                        div2.appendChild(button1);
-
-                        let div3 =  document.createElement("div");
-                        div3.setAttribute("class", "col-4");
-
-                        let button2 =  document.createElement("input");
-                        button2.setAttribute("type", "button");
-                        button2.setAttribute("class", "btn btn-primary");
-                        button2.setAttribute("name", "read");
-                        button2.setAttribute("value", "已閱讀");
-                        button2.onclick = function(){
-                            readArticles(this, value.id);
-                        }
-
-                        if(value.read_at != null){
-                            button2.disabled = true;
-                        }
-
-                        div3.appendChild(button2);
-
-                        div1.appendChild(div2);
-                        div1.appendChild(div3);
-
-                        $('#notificationRaw').append(div1);
+                            html += '>'+
+                                '</div>'+
+                            '</div>';
+                        
+                        $('#notificationRaw').append(html);
                     });
 				},
 				error:function(xhr, status, error){

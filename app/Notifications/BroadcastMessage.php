@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class NewNotification extends Notification
+class BroadcastMessage extends Notification
 {
     use Queueable;
 
@@ -16,12 +16,9 @@ class NewNotification extends Notification
      *
      * @return void
      */
-    public function __construct($user, $title, $typeId, $type)
+    public function __construct()
     {
-        $this->user = $user;
-        $this->title = $title;
-        $this->typeId = $typeId;
-        $this->type = $type;
+        //
     }
 
     /**
@@ -32,7 +29,7 @@ class NewNotification extends Notification
      */
     public function via($notifiable)
     {
-        return ['database'];
+        return ['mail'];
     }
 
     /**
@@ -57,13 +54,8 @@ class NewNotification extends Notification
      */
     public function toArray($notifiable)
     {
-
-        $data = [
-            'title' => $this->title,
-            'type' => $this->type,
-            'id' => $this->typeId
+        return [
+            //
         ];
-
-        return $data;
     }
 }

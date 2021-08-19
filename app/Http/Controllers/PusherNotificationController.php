@@ -4,12 +4,17 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Events\SendMessage;
+use App\Events\AddArticles;
 use App\Models\Articles;
 use Pusher\Pusher;
 use Carbon\Carbon;
 
 class PusherNotificationController extends Controller
 {
+
+    public $title;
+    public $id;
+
     public function notification()
     {
         $options = array(
@@ -26,32 +31,37 @@ class PusherNotificationController extends Controller
 
         try{
             $date = Carbon::now()->setTimezone('Asia/Taipei')->toDateString();
-            $articles= Articles::where('online_date', '=', $date)->get();
+            $articles = Articles::where('online_date', '=', $date)
+                                ->where('send_notice', '=', 'Y')    
+                                ->get();
             foreach($articles as $article){
                 set_time_limit(1200);
                 
-                $title = $article->title;
-                $id = $article->id;
-                $sendNotice = $article->send_notice;
+                $this->title = '您有一篇新訊息【' . $article->title . '】';
+                $this->id = $article->id;
+                // $sendNotice = $article->send_notice;
 
-                if($sendNotice == 'Y'){
-                    \App\User::chunk(10000, function($users)
-                    {   
-                        $title = $this->title;
-                        $id = $this->id;
-                        event(new AddArticles($users, $title, $id));
-                        
-                        $data['message'] = '您有一篇新訊息【' . $title. '】';
-                        $data['userData'] =  [
-                            'articleId' => $id,
-                            'isRead' => 'N',
-                            'status' => 'addArticle'
-                        ];
+                $data['message'] = $this->title;
+                $data['userData'] =  [
+                    'articleId' => $this->$id,
+                    'isRead' => 'N',
+                    'status' => 'addArticle'
+                ];
 
-                        $data['users'] = $users;
-                        $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
-                        event(new RedisMessage($data));
-                    });
+                // event(new PusherNotification($data));
+
+                \App\User::chunk(10000, function($users)
+                {   
+                    event(new AddArticles($users, $this->title, $this->$id));
+
+                    $data['users'] = $users;
+                    // dd($data);
+                    $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
+                    event(new RedisMessage($data));
+                });
+
+                // if($sendNotice == 'Y'){
+                    
 
                     // foreach (\App\User::cursor() as $user) {
                     //     $notification = $user->notifications()->where('data->status', '=', 'addArticle')->first();
@@ -67,7 +77,7 @@ class PusherNotificationController extends Controller
 
                     //     $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
                     // };
-                }
+                // }
                 
             }
         }catch(Exception $e){

@@ -7,21 +7,20 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class NewNotification extends Notification
+class PusherNotification extends Notification implements ShouldBroadcast
 {
     use Queueable;
+
+    public $data;
 
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct($user, $title, $typeId, $type)
+    public function __construct($data)
     {
-        $this->user = $user;
-        $this->title = $title;
-        $this->typeId = $typeId;
-        $this->type = $type;
+        $this->data = $data;
     }
 
     /**
@@ -32,7 +31,7 @@ class NewNotification extends Notification
      */
     public function via($notifiable)
     {
-        return ['database'];
+        return ['broadcast'];
     }
 
     /**
@@ -57,13 +56,19 @@ class NewNotification extends Notification
      */
     public function toArray($notifiable)
     {
-
-        $data = [
-            'title' => $this->title,
-            'type' => $this->type,
-            'id' => $this->typeId
+        return [
+            //
         ];
+    }
 
-        return $data;
+    public function toBroadcast($notifiable)
+    {
+        // \App\User::chunk(10000, function($users)
+        // {   
+        //     return [
+
+        //     ];
+        // }
+        
     }
 }

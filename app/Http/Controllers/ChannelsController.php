@@ -51,7 +51,7 @@ class ChannelsController extends Controller
             $channelsArticles->save();
         }
 
-        $name = '新頻道 ' . $InputChannelsName;
+        $name = '您有一篇新訊息【新頻道：' . $InputChannelsName . '】';
 
         $this->name = $name;
         $this->channelsId = $channelsId;
@@ -72,7 +72,7 @@ class ChannelsController extends Controller
             event(new AddChannels($users,  $this->name, $this->channelsId));
 
             $notification = $user->notifications()->where('data->type', '=', 'addChannel')->first();
-            $data['message'] = '您有一篇新訊息【' . $name. '】';
+            $data['message'] =  $name;
             $data['userData'] =  [
                 'userId' => $user->id,
                 'channelsId' => $channelsId,
