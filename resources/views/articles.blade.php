@@ -174,7 +174,7 @@
                             <div class="form-group">
                                 <input type="hidden" id="userId" name="userId" value="{{ $userId }}">
                                 <input type="hidden" id="notificationsCount" name="notificationsCount" value={{ $notificationsCount }}>
-                                <input type="hidden" id="message" name="message">
+                                <input type="hidden" id="message" name="message" value="">
                             </div>
                         </div>
                     </div>
@@ -187,121 +187,88 @@
     <script src="./js/notification.js"></script>
     <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
     <script>
-        $(document).ready(function() {
-            showNotification();
-             Pusher.logToConsole = true;
+        Pusher.logToConsole = true;
 
-            var pusher = new Pusher('408cd422417d5833d90d', {
-                cluster: 'ap3',
-                encrypted: true
-            });
+    var pusher = new Pusher('408cd422417d5833d90d', {
+        cluster: 'ap3',
+        encrypted: true
+    });
 
-            var channel = pusher.subscribe('article-channel');
-            channel.bind('App\\Events\\SendMessage', function(data) {
-                let userId = $('#userId').val()
-                let users = data.users;
-                // let id = users.indexOf(userId);
-                
-                let index = $.map(users, function(item, value) {
-                    return item.id.toString();
-                }).indexOf(userId);
+    var channel = pusher.subscribe('article-channel' + $('#userId').val());
+    channel.bind('App\\Events\\SendMessage', function(data) {
+        $.ajax({
+                url: '/getNotificationData', 
+                type: 'POST',
+                data:{
+                    'id' : $('#userId').val(),
+                    'type' : data.userData.type,
+                    '_token':'{{csrf_token()}}'
+                },
+                success: function(result){
+                    let message = data.message;
+                    app.message = message;
 
-                if(index != -1){
-                    $.ajax({
-                        url: '/getNotificationData', 
-                        type: 'POST',
-                        data:{
-                            'id' : users[index].id,
-                            'status' : data.userData.status,
-                            '_token':'{{csrf_token()}}'
-                        },
-                        success: function(result){
-                            let message = data.message;
+                    let notification = document.getElementsByName('notification')[0];
+                    let copy = notification.cloneNode(true);
 
-                        //     let html = 
-                        //     '<div name="notification" class="row">' +
-                        //         '<div class="col-8">' +
-                        //             '<input type="button" class="list-group-item list-group-item-action" value="' + message + '"';
-                        //             if(data.userData.status == 'addChannel'){
-                        //                 html += ' onclick="showChannelContent('+value.data.id+', '+value.id+', '+'Y'+')">';
-                        //             }else{
-                        //                 html += ' onclick="showArticleContent('+value.data.id+', '+value.id+', '+'Y'+')">';
-                        //             }
+                    let div1 =  document.createElement("div");
+                    div1.setAttribute("name", "notification");
+                    div1.setAttribute("class", "row");
 
-                        //     html += '</div>' +
-                        //         '<div class="col-4">';
-                        //          if(data.userData.status != 'deleteArticle'){
-                        //             html += '<input type="button" class="btn btn-primary" name="read" value="已閱讀"  onclick="readArticles(this, '+result.notificationId+')"';
-                        //             if(value.read_at != null){
-                        //                 html += 'disabled';
-                        //             }
-                        //         }
+                    let div2 =  document.createElement("div");
+                    div2.setAttribute("class", "col-8");
 
-                        //     html += '>'+
-                        //         '</div>'+
-                        //     '</div>';
-                        
-                        // $('#notificationRaw').append(html);
-
-                            let notification = document.getElementsByName('notification')[0];
-                            let copy = notification.cloneNode(true);
-
-                            let div1 =  document.createElement("div");
-                            div1.setAttribute("name", "notification");
-                            div1.setAttribute("class", "row");
-
-                            let div2 =  document.createElement("div");
-                            div2.setAttribute("class", "col-8");
-
-                            if(data.userData.status != 'deleteArticle'){
-                                let button1  =  document.createElement("input");
-                                button1.setAttribute("type", "button");
-                                button1.setAttribute("class", "list-group-item list-group-item-action text-danger");
-                                button1.setAttribute("value", message);
-                                button1.onclick = function(){
-                                    if(data.userData.status == 'addChannel'){
-                                        showChannelContent(data.userData.channelsId, value.id, 'Y');
-                                    }else{
-                                        showArticleContent(data.userData.articlesId, value.id, 'Y');
-                                    }
-                                }
-
-                                div2.appendChild(button1);
+                    if(data.userData.type != 'deleteArticle'){
+                        let button1  =  document.createElement("input");
+                        button1.setAttribute("type", "button");
+                        button1.setAttribute("class", "list-group-item list-group-item-action text-danger");
+                        button1.setAttribute("value", message);
+                        button1.onclick = function(){
+                            if(data.userData.type == 'addChannel'){
+                                showChannelContent(data.userData.channelsId, value.id, 'Y');
+                            }else{
+                                showArticleContent(data.userData.articlesId, value.id, 'Y');
                             }
-
-                            let div3 =  document.createElement("div");
-                            div3.setAttribute("class", "col-4");
-
-                            let button2 =  document.createElement("input");
-                            button2.setAttribute("type", "button");
-                            button2.setAttribute("class", "btn btn-primary");
-                            button2.setAttribute("name", "read");
-                            button2.setAttribute("value", "已閱讀");
-                            button2.onclick = function(){
-                                readArticles(this, result.notificationId);
-                            }
-
-                            if(result.read_at != null){
-                                button2.disabled = true;
-                            }
-
-                            div3.appendChild(button2);
-
-                            div1.appendChild(div2);
-                            div1.appendChild(div3);
-
-                            let html = $('#notificationRaw').html();
-                            $('#notificationRaw').empty();
-                            $('#notificationRaw').append(div1);
-                            $('#notificationRaw').append(html);
-
-                        },
-                        error:function(xhr, status, error){
-                            alert(xhr.statusText);
                         }
-                    });
+
+                        div2.appendChild(button1);
+                    }
+
+                    let div3 =  document.createElement("div");
+                    div3.setAttribute("class", "col-4");
+
+                    let button2 =  document.createElement("input");
+                    button2.setAttribute("type", "button");
+                    button2.setAttribute("class", "btn btn-primary");
+                    button2.setAttribute("name", "read");
+                    button2.setAttribute("value", "已閱讀");
+                    button2.onclick = function(){
+                        readArticles(this, result.notificationId);
+                    }
+
+                    if(result.read_at != null){
+                        button2.disabled = true;
+                    }
+
+                    div3.appendChild(button2);
+
+                    div1.appendChild(div2);
+                    div1.appendChild(div3);
+
+                    let html = $('#notificationRaw').html();
+                    $('#notificationRaw').empty();
+                    $('#notificationRaw').append(div1);
+                    $('#notificationRaw').append(html);
+
+                },
+                error:function(xhr, status, error){
+                    alert(xhr.statusText);
                 }
             });
+    });
+
+        $(document).ready(function() {
+            showNotification();
         });
 
         function showNotification(){
@@ -322,7 +289,7 @@
                             '<div name="notification" class="row">' +
                                 '<div class="col-8">' +
                                     '<input type="button" class="list-group-item list-group-item-action" value="' + value.data.title + '"';
-                                    if(value.data.status == 'addChannel'){
+                                    if(value.data.type == 'addChannel'){
                                         html += ' onclick="showChannelContent('+value.data.id+', '+value.id+', '+'Y'+')">';
                                     }else{
                                         html += ' onclick="showArticleContent('+value.data.id+', '+value.id+', '+'Y'+')">';
@@ -330,7 +297,7 @@
 
                             html += '</div>' +
                                 '<div class="col-4">';
-                                 if(value.data.status != 'deleteArticle'){
+                                 if(value.data.type != 'deleteArticle'){
                                     html += '<input type="button" class="btn btn-primary" name="read" value="已閱讀"  onclick="readArticles(this, '+value.id+')"';
                                     if(value.read_at != null){
                                         html += 'disabled';

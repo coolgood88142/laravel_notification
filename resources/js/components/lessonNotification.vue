@@ -24,7 +24,14 @@
 </template>
 <script>
 export default {
-    props: ['notificationsLength', 'message'],
+    props:  {
+		notificationsLength: {
+			type: Number,
+		},
+        message: {
+			type: String,
+		},
+	},
     data(){
         return {
             'count': 3,
@@ -60,6 +67,13 @@ export default {
         wheel(e){
             if(e.deltaY == 100){
                 console.log(this.page);
+                this.showThreeNotification();
+            }
+        },
+    },
+    watch:{
+        message(newVal, oldVal){
+            if(newVal != '' || newVal != null){
                 this.showThreeNotification();
             }
         }

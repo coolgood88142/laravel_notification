@@ -120,11 +120,13 @@
 	//
 	//
 	/* harmony default export */ __webpack_exports__["default"] = ({
-	  props: ['notificationsLength'],
-	  computed: {// lessons(){
-		//     this.nowCount = this.nowCount + this.count;
-		//     return this.showThreeNotification();
-		// }
+	  props: {
+		notificationsLength: {
+		  type: Number
+		},
+		message: {
+		  type: String
+		}
 	  },
 	  data: function data() {
 		return {
@@ -134,9 +136,6 @@
 		  'scroll': 0,
 		  'notifications': []
 		};
-	  },
-	  mounted: function mounted() {
-		window.addEventListener('scroll', this.scrollDs, true);
 	  },
 	  methods: {
 		defaultNotification: function defaultNotification() {
@@ -164,12 +163,13 @@
 			console.log(this.page);
 			this.showThreeNotification();
 		  }
-		},
-		scrollDs: function scrollDs() {
-		  // 页面指定了DTD，即指定了DOCTYPE时，使用document.documentElement。
-		  // 页面没有DTD，即没指定DOCTYPE时，使用document.body。
-		  this.scroll = document.documentElement.scrollTop || document.body.scrollTop;
-		  console.log(this.scroll);
+		}
+	  },
+	  watch: {
+		message: function message(newVal, oldVal) {
+		  if (newVal != '' || newVal != null) {
+			this.showThreeNotification();
+		  }
 		}
 	  }
 	});
@@ -1098,6 +1098,9 @@
 	  el: "#app",
 	  components: {
 		"lesson_notification": _components_lessonNotification_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
+	  },
+	  data: {
+		"message": ""
 	  }
 	});
 	

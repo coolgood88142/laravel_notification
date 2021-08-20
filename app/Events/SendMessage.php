@@ -33,7 +33,7 @@ class SendMessage implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('article-channel'. $this->data['userData']['userId']);
+        return new Channel('article-channel');
     }
   
     public function broadcastAs()

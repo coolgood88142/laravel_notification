@@ -68,7 +68,7 @@ class CommentController extends Controller
             }
 
             $users = User::WhereIn('id', $idArray)->get();
-            event(new AddComment($users,  $title, $articleId));
+            // event(new AddComment($users,  $title, $articleId));
 
             $pusher = new Pusher(
                 '408cd422417d5833d90d',
@@ -91,18 +91,19 @@ class CommentController extends Controller
                 'type' => 'addComment'
             ];
 
-            $data['users'] = $users;
+            // $data['users'] = $users;
 
             //怎麼從10000個送到前端時，去只到對應的channel
 
             // event(new SendMessage($data));
-            $pusher->trigger('article-channel' . Auth::id(), 'App\\Events\\SendMessage', $data);
+            
+            // $pusher->trigger('article-channel' . Auth::id(), 'App\\Events\\SendMessage', $data);
             // event(new RedisMessage($data));
 
-            // foreach($users as $user){
-                
-    
-            // }
+            foreach($users as $user){
+                // dd($user->id);
+                $pusher->trigger('article-channel' . $user->id, 'App\\Events\\SendMessage', $data);
+            }
 
             $comment = new Comment();
             $comment->user_id = $userId;
