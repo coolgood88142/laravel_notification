@@ -101,7 +101,7 @@
                                 @endif
                             @else
                             @if (Auth::check())
-                                <lesson_notification :notifications-length="{{ auth()->user()->unreadNotifications->count() }}" :message="message"></lesson_notification> 
+                                <notification :notifications-length="{{ auth()->user()->unreadNotifications->count() }}" :notification-data="notificationData"></notification> 
                             @endif
                                 <li class="nav-item dropdown">
                                     <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
@@ -185,87 +185,8 @@
     <script src="{{mix('js/app.js')}}"></script>
 	<script src="{{mix('js/edit.js')}}"></script>
     <script src="./js/notification.js"></script>
-    <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
+    {{-- <script src="https://js.pusher.com/7.0/pusher.min.js"></script> --}}
     <script>
-        Pusher.logToConsole = true;
-
-    var pusher = new Pusher('408cd422417d5833d90d', {
-        cluster: 'ap3',
-        encrypted: true
-    });
-
-    var channel = pusher.subscribe('article-channel' + $('#userId').val());
-    channel.bind('App\\Events\\SendMessage', function(data) {
-        $.ajax({
-                url: '/getNotificationData', 
-                type: 'POST',
-                data:{
-                    'id' : $('#userId').val(),
-                    'type' : data.userData.type,
-                    '_token':'{{csrf_token()}}'
-                },
-                success: function(result){
-                    let message = data.message;
-                    app.message = message;
-
-                    let notification = document.getElementsByName('notification')[0];
-                    let copy = notification.cloneNode(true);
-
-                    let div1 =  document.createElement("div");
-                    div1.setAttribute("name", "notification");
-                    div1.setAttribute("class", "row");
-
-                    let div2 =  document.createElement("div");
-                    div2.setAttribute("class", "col-8");
-
-                    if(data.userData.type != 'deleteArticle'){
-                        let button1  =  document.createElement("input");
-                        button1.setAttribute("type", "button");
-                        button1.setAttribute("class", "list-group-item list-group-item-action text-danger");
-                        button1.setAttribute("value", message);
-                        button1.onclick = function(){
-                            if(data.userData.type == 'addChannel'){
-                                showChannelContent(data.userData.channelsId, value.id, 'Y');
-                            }else{
-                                showArticleContent(data.userData.articlesId, value.id, 'Y');
-                            }
-                        }
-
-                        div2.appendChild(button1);
-                    }
-
-                    let div3 =  document.createElement("div");
-                    div3.setAttribute("class", "col-4");
-
-                    let button2 =  document.createElement("input");
-                    button2.setAttribute("type", "button");
-                    button2.setAttribute("class", "btn btn-primary");
-                    button2.setAttribute("name", "read");
-                    button2.setAttribute("value", "已閱讀");
-                    button2.onclick = function(){
-                        readArticles(this, result.notificationId);
-                    }
-
-                    if(result.read_at != null){
-                        button2.disabled = true;
-                    }
-
-                    div3.appendChild(button2);
-
-                    div1.appendChild(div2);
-                    div1.appendChild(div3);
-
-                    let html = $('#notificationRaw').html();
-                    $('#notificationRaw').empty();
-                    $('#notificationRaw').append(div1);
-                    $('#notificationRaw').append(html);
-
-                },
-                error:function(xhr, status, error){
-                    alert(xhr.statusText);
-                }
-            });
-    });
 
         $(document).ready(function() {
             showNotification();

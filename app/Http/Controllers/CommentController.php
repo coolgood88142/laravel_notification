@@ -68,7 +68,7 @@ class CommentController extends Controller
             }
 
             $users = User::WhereIn('id', $idArray)->get();
-            // event(new AddComment($users,  $title, $articleId));
+            event(new AddComment($users,  $title, $articleId));
 
             $pusher = new Pusher(
                 '408cd422417d5833d90d',
@@ -101,7 +101,8 @@ class CommentController extends Controller
             // event(new RedisMessage($data));
 
             foreach($users as $user){
-                // dd($user->id);
+                $notification = $user->notifications()->first();
+                $data['notification'] = $notification;
                 $pusher->trigger('article-channel' . $user->id, 'App\\Events\\SendMessage', $data);
             }
 
@@ -109,7 +110,7 @@ class CommentController extends Controller
             $comment->user_id = $userId;
             $comment->articles_id = $articleId;
             $comment->text = $text;
-            $comment->save();
+            // $comment->save();
             
         }catch(Exception $e){
             $status = 'error';
