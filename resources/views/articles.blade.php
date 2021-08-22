@@ -187,9 +187,60 @@
     <script src="./js/notification.js"></script>
     {{-- <script src="https://js.pusher.com/7.0/pusher.min.js"></script> --}}
     <script>
-
         $(document).ready(function() {
             showNotification();
+            Pusher.logToConsole = true;
+
+            var pusher = new Pusher('408cd422417d5833d90d', {
+                cluster: 'ap3',
+                encrypted: true
+            });
+
+            var channel = pusher.subscribe('article-channel' + $('#userId').val());
+            channel.bind('App\\Events\\SendMessage', function(data) {
+                $.ajax({
+                    url: '/getNotificationData', 
+                    type: 'POST',
+                    data:{
+                        'id' : $('#userId').val(),
+                        'type' : data.userData.type,
+                        '_token':'{{csrf_token()}}'
+                    },
+                    success: function(result){
+                        let html = 
+                            '<div name="notification" class="row">' +
+                                '<div class="col-8">' +
+                                    '<input type="button" class="list-group-item list-group-item-action text-danger" value="' + data.message + '"';
+                                    if(data.userData.type == 'addChannel'){
+                                        html += ' onclick="showChannelContent('+data.userData.id+', '+result.notificationId+', '+'Y'+')">';
+                                    }else{
+                                        html += ' onclick="showArticleContent('+data.userData.id+', '+result.notificationId+', '+'Y'+')">';
+                                    }
+                                    
+                            html += '</div>' +
+                                '<div class="col-4">';
+                                 if(data.userData.type != 'deleteArticle'){
+                                    html += '<input type="button" class="btn btn-primary" name="read" value="已閱讀"  onclick="readArticles(this, '+result.notificationId+')"';
+                                    if(result.read_at != null){
+                                        html += 'disabled';
+                                    }
+                                }
+
+                            html += '>'+
+                                '</div>'+
+                            '</div>';
+                        
+                        let notification = $('#notificationRaw').html();
+                        $('#notificationRaw').empty();
+                        $('#notificationRaw').append(html);
+                        $('#notificationRaw').append(notification);
+
+                    },
+                    error:function(xhr, status, error){
+                        alert(xhr.statusText);
+                    }
+                })
+            });
         });
 
         function showNotification(){

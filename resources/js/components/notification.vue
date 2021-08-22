@@ -1,14 +1,13 @@
 <template>
     <li class="nav-item dropdown">
         <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" 
-            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                v-on:click="defaultNotification()">
+            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 通知 <span class="badge badge-danger" id="count-notification">
-                    {{ notificationsLength }}</span>
+                    {{ notificationsCount }}</span>
                 <span class="caret"></span>
         </a>
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown" @mousewheel="wheel" style="height: 110px; overflow-y: scroll;">
-            <loading :active.sync="isLoading"></loading>
+            <!-- <loading :active.sync="isLoading"></loading> -->
             <a class="dropdown-item" v-for="(notification, index) in notifications" :key="index">
                 {{ notification.data.title }}
             </a>
@@ -24,8 +23,8 @@
     </li> 
 </template>
 <script>
-import Loading from 'vue-loading-overlay';
-import 'vue-loading-overlay/dist/vue-loading.css' ;
+// import Loading from 'vue-loading-overlay';
+// import 'vue-loading-overlay/dist/vue-loading.css' ;
 
 export default {
     props:  {
@@ -36,27 +35,28 @@ export default {
 			type: Object,
 		},
 	},
-    components: {
-        'Loading' :　Loading
-    },
+    // components: {
+    //     'Loading' :　Loading
+    // },
     data(){
         return {
             'count': 3,
             'nowCount': 0,
-            'page' : 1,
+            'page' : 0,
             'scroll' : 0,
             'notifications' : [],
+            'notificationsCount' : this.notificationsLength
         }
     },
+    mounted(){
+        this.showThreeNotification()
+    },
     methods: {
-        defaultNotification(){
-            this.page = 1;
-            this.showThreeNotification();
-        },
         showThreeNotification(){
             let url = './showNotification'
             let params = {
                 'page' : this.page,
+                'count' : this.count
             }
 
             axios.post(url, params).then((response) => {
@@ -81,9 +81,14 @@ export default {
     watch:{
         notificationData(newVal, oldVal){
             if(newVal != '' || newVal != null){
-                this.notificationsLength += 1
-                this.notifications.push(newVal)
-                this.page -= 1
+                this.notificationsCount += 1
+                this.page = 0
+                this.notifications = [];
+                this.defaultNotification()
+
+                // this.notifications.push(newVal)
+                // this.page -= 1
+                // this.count -= 1
             }
         }
     }

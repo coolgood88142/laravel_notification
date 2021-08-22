@@ -205,7 +205,7 @@ class ArticlesController extends Controller
                 
                 $data['message'] =  $title;
                 $data['userData'] =  [
-                    'articleId' => $id,
+                    'id' => $id,
                     'isRead' => 'N',
                     'type' => 'deleteArticle'
                 ];
@@ -224,19 +224,28 @@ class ArticlesController extends Controller
     //通知列表-顯示全部的通知
     public function showNotification(Request $request){
         $page = $request->page;
+        $count = $request->count;
 
         if($page != null && $page != ''){
             $nowCount = ($page - 1) * 3 + 1;
-            $count = $page * 3;
         }else{
             $nowCount = $request->nowCount;
-            $count = $request->count;
         }
 
         $id = Auth::id();
         $user = \App\User::where('id', '=', $id)->first();
         $newNotification = $user->notifications->skip($nowCount)->take($count);
         return $newNotification;
+    }
+
+    public function getNotificationDataCount(Request $request){
+        $page = $request->page;
+        $count = $request->count;
+        $notificationId = $request->notificationId;
+        $notifiableId = $request->notifiable_id;
+
+        $user = User::where('id', '=', $notifiableId);
+        $notification = $user->notifications()->where('id', '=', $notificationId);
     }
 
     public function sendNotification(){

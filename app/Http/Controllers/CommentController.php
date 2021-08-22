@@ -85,7 +85,7 @@ class CommentController extends Controller
             $data['message'] = $title;
             $data['userData'] = [
                 'userId' => Auth::id(),
-                'articleId' => $articleId,
+                'id' => $articleId,
                 // 'notificationId' => $notification->id,
                 'isRead' => 'N',
                 'type' => 'addComment'
@@ -110,7 +110,7 @@ class CommentController extends Controller
             $comment->user_id = $userId;
             $comment->articles_id = $articleId;
             $comment->text = $text;
-            // $comment->save();
+            $comment->save();
             
         }catch(Exception $e){
             $status = 'error';

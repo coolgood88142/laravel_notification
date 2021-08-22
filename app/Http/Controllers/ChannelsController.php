@@ -75,7 +75,7 @@ class ChannelsController extends Controller
             $data['message'] =  $name;
             $data['userData'] =  [
                 'userId' => $user->id,
-                'channelsId' => $channelsId,
+                'id' => $channelsId,
                 'notificationId' => $notification->id,
                 'isRead' => 'N',
                 'type' => 'addChannel'
