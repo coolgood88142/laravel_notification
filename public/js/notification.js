@@ -119,6 +119,7 @@
 	//
 	//
 	//
+	//
 	// import Loading from 'vue-loading-overlay';
 	// import 'vue-loading-overlay/dist/vue-loading.css' ;
 	/* harmony default export */ __webpack_exports__["default"] = ({
@@ -136,7 +137,7 @@
 	  data: function data() {
 		return {
 		  'count': 3,
-		  'nowCount': 0,
+		  'reduceCount': 0,
 		  'page': 0,
 		  'scroll': 0,
 		  'notifications': [],
@@ -153,14 +154,17 @@
 		  var url = './showNotification';
 		  var params = {
 			'page': this.page,
-			'count': this.count
+			'count': this.count,
+			'reduceCount': this.reduceCount
 		  };
 		  axios.post(url, params).then(function (response) {
 			if (response.data.length != 0) {
 			  var dataArray = Object.values(response.data);
-			  var array = _this.notifications;
-			  _this.notifications = array.concat(dataArray);
+			  var notificationsArray = _this.notifications;
+			  _this.notifications = notificationsArray.concat(dataArray);
 			  _this.page++;
+			  _this.count = 3;
+			  _this.reduceCount = 0;
 			}
 		  })["catch"](function (error) {});
 		},
@@ -169,17 +173,42 @@
 			console.log(this.page);
 			this.showThreeNotification();
 		  }
+		},
+		showArticleContent: function showArticleContent(id, notificationId) {
+		  console.log(id);
+		  console.log(notificationId);
+		  var userId = $('#userId').val();
+		  var url = '/showArticleContent?id=' + id + '&userId=' + userId + '&isAdd=N';
+	
+		  if (notificationId != null) {
+			url = url + '&notificationId=' + notificationId;
+		  }
+	
+		  window.location.href = url;
+		},
+		showChannelContent: function showChannelContent(id, notificationId) {
+		  var userId = $('#userId').val();
+		  var url = '/showChannelContent?channelsId=' + id + '&userId=' + userId;
+	
+		  if (notificationId != null) {
+			url = url + '&notificationId=' + notificationId;
+		  }
+	
+		  window.location.href = url;
 		}
 	  },
 	  watch: {
 		notificationData: function notificationData(newVal, oldVal) {
 		  if (newVal != '' || newVal != null) {
-			this.notificationsCount += 1;
-			this.page = 0;
-			this.notifications = [];
-			this.defaultNotification(); // this.notifications.push(newVal)
-			// this.page -= 1
-			// this.count -= 1
+			this.notificationsCount += 1; // this.page = 0
+			// this.notifications = [];
+			// this.showThreeNotification()
+	
+			var newNotificationsData = [];
+			newNotificationsData.push(newVal);
+			this.notifications = newNotificationsData.concat(this.notifications);
+			this.reduceCount++;
+			this.count -= 1;
 		  }
 		}
 	  }
@@ -886,11 +915,28 @@
 		  },
 		  [
 			_vm._l(_vm.notifications, function(notification, index) {
-			  return _c("a", { key: index, staticClass: "dropdown-item" }, [
-				_vm._v(
-				  "\n            " + _vm._s(notification.data.title) + "\n        "
-				)
-			  ])
+			  return _c(
+				"a",
+				{
+				  key: index,
+				  staticClass: "dropdown-item",
+				  on: {
+					click: function($event) {
+					  return _vm.showArticleContent(
+						notification.data.id,
+						notification.id
+					  )
+					}
+				  }
+				},
+				[
+				  _vm._v(
+					"\n            " +
+					  _vm._s(notification.data.title) +
+					  "\n        "
+				  )
+				]
+			  )
 			}),
 			_vm._v(" "),
 			_vm.notifications.length == 0

@@ -185,7 +185,7 @@
     <script src="{{mix('js/app.js')}}"></script>
 	<script src="{{mix('js/edit.js')}}"></script>
     <script src="./js/notification.js"></script>
-    {{-- <script src="https://js.pusher.com/7.0/pusher.min.js"></script> --}}
+    <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
     <script>
         $(document).ready(function() {
             showNotification();
@@ -212,15 +212,15 @@
                                 '<div class="col-8">' +
                                     '<input type="button" class="list-group-item list-group-item-action text-danger" value="' + data.message + '"';
                                     if(data.userData.type == 'addChannel'){
-                                        html += ' onclick="showChannelContent('+data.userData.id+', '+result.notificationId+', '+'Y'+')">';
+                                        html += ' onclick="showChannelContent('+"'"+data.userData.id+"'"+', '+"'"+result.notificationId+"'"+')">';
                                     }else{
-                                        html += ' onclick="showArticleContent('+data.userData.id+', '+result.notificationId+', '+'Y'+')">';
+                                        html += ' onclick="showArticleContent('+"'"+data.userData.id+"'"+', '+"'"+result.notificationId+"'"+')">';
                                     }
                                     
                             html += '</div>' +
                                 '<div class="col-4">';
                                  if(data.userData.type != 'deleteArticle'){
-                                    html += '<input type="button" class="btn btn-primary" name="read" value="已閱讀"  onclick="readArticles(this, '+result.notificationId+')"';
+                                    html += '<input type="button" class="btn btn-primary" name="read" value="已閱讀"  onclick="readArticles(this, '+"'"+result.notificationId+"'"+')"';
                                     if(result.read_at != null){
                                         html += 'disabled';
                                     }
@@ -256,21 +256,25 @@
                     
                     console.log(result);
                     $.each(result, function(index, value) {
+                        let deffDate = DateDiff("2016/5/28","2016/6/2"); ;
 
                         let html = 
                             '<div name="notification" class="row">' +
-                                '<div class="col-8">' +
+                                '<div class="col-7">' +
                                     '<input type="button" class="list-group-item list-group-item-action" value="' + value.data.title + '"';
                                     if(value.data.type == 'addChannel'){
-                                        html += ' onclick="showChannelContent('+value.data.id+', '+value.id+', '+'Y'+')">';
+                                        html += ' onclick="showChannelContent('+"'"+value.data.id+"'"+', '+"'"+value.id+"'"+')">';
                                     }else{
-                                        html += ' onclick="showArticleContent('+value.data.id+', '+value.id+', '+'Y'+')">';
+                                        html += ' onclick="showArticleContent('+"'"+value.data.id+"'"+', '+"'"+value.id+"'"+')">';
                                     }
-
                             html += '</div>' +
+                                '<div class="col-1">'
+                                    DateDiff("2016/5/28","2016/6/2"); 
+                                    carbon::parse ('2020-12-10')->diffInDays('2020-12-28', true);
+                                '</div>'+
                                 '<div class="col-4">';
                                  if(value.data.type != 'deleteArticle'){
-                                    html += '<input type="button" class="btn btn-primary" name="read" value="已閱讀"  onclick="readArticles(this, '+value.id+')"';
+                                    html += '<input type="button" class="btn btn-primary" name="read" value="已閱讀"  onclick="readArticles(this, '+"'"+value.id+"'"+')"';
                                     if(value.read_at != null){
                                         html += 'disabled';
                                     }
@@ -289,7 +293,7 @@
 			});
         }
 
-        function showArticleContent(id, notificationId, isRead){
+        function showArticleContent(id, notificationId){
             let userId = $('#userId').val();
             let url = '/showArticleContent?id='+ id +'&userId='+ userId +'&isAdd=N';
             
@@ -297,23 +301,15 @@
                 url = url + '&notificationId=' + notificationId
             }
 
-            if(isRead != null){
-                url = url + '&isRead=' + isRead
-            }
-
             window.location.href = url;
         }
 
-        function showChannelContent(id, notificationId, isRead){
+        function showChannelContent(id, notificationId){
             let userId = $('#userId').val();
             let url = '/showChannelContent?channelsId='+ id +'&userId='+ userId;
             
             if(notificationId != null){
                 url = url + '&notificationId=' + notificationId
-            }
-
-            if(isRead != null){
-                url = url + '&isRead=' + isRead
             }
 
             window.location.href = url;

@@ -8,7 +8,8 @@
         </a>
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown" @mousewheel="wheel" style="height: 110px; overflow-y: scroll;">
             <!-- <loading :active.sync="isLoading"></loading> -->
-            <a class="dropdown-item" v-for="(notification, index) in notifications" :key="index">
+            <!-- <input type="button" class="list-group-item list-group-item-action" v-for="(notification, index) in notifications" :key="index" :value="notification.data.title" onclick="showArticleContent(28, ae7278b9-0b76-4035-9d24-4771bc8c7295, Y)"> -->
+            <a class="dropdown-item" v-for="(notification, index) in notifications" :key="index" @click="showArticleContent(notification.data.id, notification.id)">
                 {{ notification.data.title }}
             </a>
 
@@ -41,7 +42,7 @@ export default {
     data(){
         return {
             'count': 3,
-            'nowCount': 0,
+            'reduceCount': 0,
             'page' : 0,
             'scroll' : 0,
             'notifications' : [],
@@ -56,15 +57,18 @@ export default {
             let url = './showNotification'
             let params = {
                 'page' : this.page,
-                'count' : this.count
+                'count' : this.count,
+                'reduceCount' : this.reduceCount
             }
 
             axios.post(url, params).then((response) => {
                 if(response.data.length != 0){
                     let dataArray = Object.values(response.data);
-                    let array = this.notifications;
-                    this.notifications = array.concat(dataArray);
+                    let notificationsArray = this.notifications;
+                    this.notifications = notificationsArray.concat(dataArray);
                     this.page++;
+                    this.count = 3;
+                    this.reduceCount = 0;
                 }
 				
 			}).catch((error) => {
@@ -77,18 +81,42 @@ export default {
                 this.showThreeNotification();
             }
         },
+        showArticleContent(id, notificationId){
+            console.log(id);
+            console.log(notificationId);
+            let userId = $('#userId').val();
+            let url = '/showArticleContent?id='+ id +'&userId='+ userId +'&isAdd=N';
+            
+            if(notificationId != null){
+                url = url + '&notificationId=' + notificationId
+            }
+
+            window.location.href = url;
+        },
+        showChannelContent(id, notificationId){
+            let userId = $('#userId').val();
+            let url = '/showChannelContent?channelsId='+ id +'&userId='+ userId;
+            
+            if(notificationId != null){
+                url = url + '&notificationId=' + notificationId
+            }
+
+            window.location.href = url;
+        }
     },
     watch:{
         notificationData(newVal, oldVal){
             if(newVal != '' || newVal != null){
                 this.notificationsCount += 1
-                this.page = 0
-                this.notifications = [];
-                this.defaultNotification()
+                // this.page = 0
+                // this.notifications = [];
+                // this.showThreeNotification()
 
-                // this.notifications.push(newVal)
-                // this.page -= 1
-                // this.count -= 1
+                let newNotificationsData = []
+                newNotificationsData.push(newVal)
+                this.notifications = newNotificationsData.concat(this.notifications);
+                this.reduceCount++
+                this.count -= 1
             }
         }
     }

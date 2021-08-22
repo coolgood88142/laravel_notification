@@ -77,7 +77,6 @@ class ChannelsController extends Controller
                 'userId' => $user->id,
                 'id' => $channelsId,
                 'notificationId' => $notification->id,
-                'isRead' => 'N',
                 'type' => 'addChannel'
             ];
             $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
@@ -92,18 +91,17 @@ class ChannelsController extends Controller
     {
         $userId = $request->userId;
         $notificationId = $request->notificationId;
-        $isRead = $request->isRead;
         $channelsId = $request->channelsId;
         $channels = Channels::where('id', '=', $channelsId)->first();
         $idArray = [];
 
         $channelsArticles = ChannelsArticles::where('channels_id', '=', $channels->id)->get();
 
-        if($notificationId != null && $userId != null && $isRead == 'N'){
-            //點選後直接做已閱讀
-            $controller = new ArticlesController();
-            $controller->readNotifications($notificationId, $userId);
-        }
+        // if($notificationId != null && $userId != null && $isRead == 'N'){
+        //     //點選後直接做已閱讀
+        //     $controller = new ArticlesController();
+        //     $controller->readNotifications($notificationId, $userId);
+        // }
         
         foreach($channelsArticles as $channel){
             array_push($idArray, $channel->articles_id);

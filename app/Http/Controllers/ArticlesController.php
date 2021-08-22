@@ -107,13 +107,16 @@ class ArticlesController extends Controller
     }
 
     //已閱讀通知
-    public function readNotifications($id, $userId){
+    public function readNotifications(Request $request){
+        $userId =  $request->userId;
+        $id =  $request->id;
         $user = User::where('id', '=', $userId)->first();
         $data = $user->unreadNotifications->where('id', '=', $id)->first()->markAsRead();
     }
 
     //已閱讀全部
-    public function readNotificationsAll($userId){
+    public function readNotificationsAll(Request $request){
+        $userId =  $request->userId;
         $user = User::where('id', '=', $userId)->first();
         $data = $user->unreadNotifications->markAsRead();
     }
@@ -125,7 +128,6 @@ class ArticlesController extends Controller
         $userId = $request->userId;
         $notificationId = $request->notificationId;
         $isAdd = $request->isAdd;
-        $isRead = $request->isRead;
         $articles = Articles::where('id', '=', $id)->first();
         $user = User::where('id', '=', $articles->author_id)->first();
         $comment =  DB::table('users')
@@ -136,10 +138,10 @@ class ArticlesController extends Controller
             ])
             ->get();
 
-        if($notificationId != null && $userId != null && $isRead == 'N'){
-            //點選後直接做已閱讀
-            $this->readNotifications($notificationId, $userId);
-        }
+        // if($notificationId != null && $userId != null && $isRead == 'N'){
+        //     //點選後直接做已閱讀
+        //     $this->readNotifications($notificationId, $userId);
+        // }
         
 
         return view('edit', [
@@ -206,7 +208,6 @@ class ArticlesController extends Controller
                 $data['message'] =  $title;
                 $data['userData'] =  [
                     'id' => $id,
-                    'isRead' => 'N',
                     'type' => 'deleteArticle'
                 ];
 
@@ -225,9 +226,13 @@ class ArticlesController extends Controller
     public function showNotification(Request $request){
         $page = $request->page;
         $count = $request->count;
+        $reduceCount = $request->reduceCount;
 
         if($page != null && $page != ''){
             $nowCount = ($page - 1) * 3 + 1;
+            if($reduceCount != null && $reduceCount != ''){
+                $nowCount = $nowCount - $reduceCount;
+            }
         }else{
             $nowCount = $request->nowCount;
         }
