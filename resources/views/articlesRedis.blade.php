@@ -101,7 +101,7 @@
                                 @endif
                             @else
                             @if (Auth::check())
-                                <lesson_notification :lessons="{{ auth()->user()->unreadNotifications }}"></lesson_notification> 
+                                <lesson_notification :lessons="{{ auth()->user()->unreadNotifications }} :broadcast="broadcast" "></lesson_notification> 
                             @endif
                                 <li class="nav-item dropdown">
                                     <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
@@ -211,7 +211,7 @@
 
                 if(index != -1){
                     $.ajax({
-                        url: '/getNotificationData', 
+                        url: "{{ route('getNotificationData') }}", 
                         type: 'POST',
                         data:{
                             'id' : users[index].id,
@@ -300,7 +300,7 @@
         function getNotificationData(user, status){
             let data = [];
             $.ajax({
-				url: '/getNotificationData', 
+				url: "{{ route('getNotificationData') }}", 
 				type: 'POST',
 				data:{
                     'user' : user,
@@ -319,7 +319,7 @@
 
         function showNotification(){
             $.ajax({
-				url: '/showNotification', 
+				url: "{{ route('showNotification') }}", 
 				type: 'POST',
 				data:{
                     'nowCount' : $("div[name='notification']").length,
@@ -400,7 +400,7 @@
 
 		function readArticles(el, id){
 			$.ajax({
-				url: '/readArticles', 
+				url: "{{ route('readArticles') }}", 
 				type: 'POST',
 				data:{
 					"id" : id,
@@ -425,7 +425,7 @@
 
         function deleteArticles(el, id){
 			$.ajax({
-				url: '/deleteArticles', 
+				url: "{{ route('deleteArticles') }}", 
 				type: 'POST',
 				data:{
 					"id" : id,

@@ -101,7 +101,7 @@
                                 @endif
                             @else
                             @if (Auth::check())
-                                <notification :notifications-length="{{ auth()->user()->unreadNotifications->count() }}" :notification-data="notificationData"></notification> 
+                                <notification :notifications-length="{{ auth()->user()->unreadNotifications->count() }}" :broadcast="broadcast" :user-id={{ $userId }}></notification> 
                             @endif
                                 <li class="nav-item dropdown">
                                     <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
@@ -199,12 +199,12 @@
             var channel = pusher.subscribe('article-channel' + $('#userId').val());
             channel.bind('App\\Events\\SendMessage', function(data) {
                 $.ajax({
-                    url: '/getNotificationData', 
+                    url: "{{ route('getNotificationData') }}", 
                     type: 'POST',
                     data:{
                         'id' : $('#userId').val(),
                         'type' : data.userData.type,
-                        '_token':'{{csrf_token()}}'
+                        '_token' : '{{csrf_token()}}'
                     },
                     success: function(result){
                         let html = 
@@ -245,7 +245,7 @@
 
         function showNotification(){
             $.ajax({
-				url: '/showNotification', 
+				url: "{{ route('showNotification') }}", 
 				type: 'POST',
 				data:{
                     'nowCount' : $("div[name='notification']").length,
@@ -256,7 +256,7 @@
                     
                     console.log(result);
                     $.each(result, function(index, value) {
-                        let deffDate = DateDiff("2016/5/28","2016/6/2"); ;
+                        // let deffDate = DateDiff("2016/5/28","2016/6/2"); 
 
                         let html = 
                             '<div name="notification" class="row">' +
@@ -269,8 +269,8 @@
                                     }
                             html += '</div>' +
                                 '<div class="col-1">'
-                                    DateDiff("2016/5/28","2016/6/2"); 
-                                    carbon::parse ('2020-12-10')->diffInDays('2020-12-28', true);
+                                    // DateDiff("2016/5/28","2016/6/2"); 
+                                    // carbon::parse ('2020-12-10')->diffInDays('2020-12-28', true);
                                 '</div>'+
                                 '<div class="col-4">';
                                  if(value.data.type != 'deleteArticle'){
@@ -295,7 +295,7 @@
 
         function showArticleContent(id, notificationId){
             let userId = $('#userId').val();
-            let url = '/showArticleContent?id='+ id +'&userId='+ userId +'&isAdd=N';
+            let url = "{{ route('showArticleContent') }}" + '?id='+ id +'&userId='+ userId +'&isAdd=N';
             
             if(notificationId != null){
                 url = url + '&notificationId=' + notificationId
@@ -306,7 +306,7 @@
 
         function showChannelContent(id, notificationId){
             let userId = $('#userId').val();
-            let url = '/showChannelContent?channelsId='+ id +'&userId='+ userId;
+            let url = "{{ route('showChannelContent') }}" + '?channelsId='+ id +'&userId='+ userId;
             
             if(notificationId != null){
                 url = url + '&notificationId=' + notificationId
@@ -317,7 +317,7 @@
 
 		function readArticles(el, id){
 			$.ajax({
-				url: '/readArticles', 
+				url: "{{ route('readArticles') }}", 
 				type: 'POST',
 				data:{
 					"id" : id,
@@ -342,7 +342,7 @@
 
         function deleteArticles(el, id){
 			$.ajax({
-				url: '/deleteArticles', 
+				url: "{{ route('deleteArticles') }}", 
 				type: 'POST',
 				data:{
 					"id" : id,

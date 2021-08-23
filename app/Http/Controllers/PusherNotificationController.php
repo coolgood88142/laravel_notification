@@ -54,9 +54,13 @@ class PusherNotificationController extends Controller
                 {   
                     event(new AddArticles($users, $this->title, $this->$id));
 
-                    $data['users'] = $users;
+                    foreach($users as $user){
+                        $notification = $user->notifications()->first();
+                        $data['broadcast'] = $notification;
+                        $pusher->trigger('article-channel' . $user->id, 'App\\Events\\SendMessage', $data);
+                    }
                     // dd($data);
-                    $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
+                    // $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
                     event(new RedisMessage($data));
                 });
 

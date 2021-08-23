@@ -161,7 +161,7 @@
     </div>
     <script src="{{mix('js/app.js')}}"></script>
     <script src="{{mix('js/edit.js')}}"></script>
-    <script src="./js/lessonNotification.js"></script>
+    <script src="./js/notification.js"></script>
     <script>
         function addComment(){
             let InputComment = $('#InputComment').val();

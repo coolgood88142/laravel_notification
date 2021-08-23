@@ -7,17 +7,24 @@
                 <span class="caret"></span>
         </a>
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown" @mousewheel="wheel" style="height: 110px; overflow-y: scroll;">
-            <!-- <loading :active.sync="isLoading"></loading> -->
-            <!-- <input type="button" class="list-group-item list-group-item-action" v-for="(notification, index) in notifications" :key="index" :value="notification.data.title" onclick="showArticleContent(28, ae7278b9-0b76-4035-9d24-4771bc8c7295, Y)"> -->
-            <a class="dropdown-item" v-for="(notification, index) in notifications" :key="index" @click="showArticleContent(notification.data.id, notification.id)">
-                {{ notification.data.title }}
-            </a>
+           
+            <div v-for="(notification, index) in notificationsData" :key="index">
+                <a v-if="notification.data.type === 'deleteArticle'" class="dropdown-item" :style="[notification.read_at !== null ? isRead : '']" >
+                    {{ notification.data.title }}
+                </a>
+                <a v-else-if="notification.data.type === 'addChannel'" class="dropdown-item" :href="'/showChannelContent?id=' + notification.data.id +'&userId='+ userId +'&notificationId=' + notification.id " :style="[notification.read_at !== null ? isRead : '']" >
+                    {{ notification.data.title }}
+                </a>
+                <a v-else class="dropdown-item" :href="'/showArticleContent?id=' + notification.data.id +'&userId='+ userId +'&notificationId=' + notification.id " :style="[notification.read_at !== null ? isRead : '']" >
+                    {{ notification.data.title }}
+                </a>
+            </div>
 
             <!-- <a class="dropdown-item" v-if="lessons.length != 0"  onClick="showThreeNotification()">
                 更多
             </a> -->
 
-            <a class="dropdown-item" v-if="notifications.length == 0">
+            <a class="dropdown-item" v-if="notificationsData.length == 0">
                 沒通知訊息
             </a>
         </div>
@@ -32,9 +39,12 @@ export default {
 		notificationsLength: {
 			type: Number,
 		},
-        notificationData: {
+        broadcast: {
 			type: Object,
 		},
+        userId: {
+            type: Number
+        }
 	},
     // components: {
     //     'Loading' :　Loading
@@ -45,8 +55,11 @@ export default {
             'reduceCount': 0,
             'page' : 0,
             'scroll' : 0,
-            'notifications' : [],
-            'notificationsCount' : this.notificationsLength
+            'notificationsData' : [],
+            'notificationsCount' : this.notificationsLength,
+            'isRead' : {
+                background: 'darkgrey'
+            }
         }
     },
     mounted(){
@@ -64,8 +77,8 @@ export default {
             axios.post(url, params).then((response) => {
                 if(response.data.length != 0){
                     let dataArray = Object.values(response.data);
-                    let notificationsArray = this.notifications;
-                    this.notifications = notificationsArray.concat(dataArray);
+                    let notificationsArray = this.notificationsData;
+                    this.notificationsData = notificationsArray.concat(dataArray);
                     this.page++;
                     this.count = 3;
                     this.reduceCount = 0;
@@ -76,16 +89,24 @@ export default {
             });
         },
         wheel(e){
-            if(e.deltaY == 100){
-                console.log(this.page);
+            let box = e.path[2];
+            var clientHeight = box.clientHeight 
+            var scrollTop = box.scrollTop 
+            var scrollHeight = box.scrollHeight 
+            if (scrollTop + clientHeight == scrollHeight) { 
                 this.showThreeNotification();
             }
+            // console.log(box);
+            // if(e.deltaY == 100){
+            //     // console.log(this.page);
+            //     this.showThreeNotification();
+            // }
         },
         showArticleContent(id, notificationId){
             console.log(id);
             console.log(notificationId);
             let userId = $('#userId').val();
-            let url = '/showArticleContent?id='+ id +'&userId='+ userId +'&isAdd=N';
+            let url = '/showArticleContent?id='+ id +'&userId='+ userId +'&notificationId=';
             
             if(notificationId != null){
                 url = url + '&notificationId=' + notificationId
@@ -105,16 +126,17 @@ export default {
         }
     },
     watch:{
-        notificationData(newVal, oldVal){
+        broadcast(newVal, oldVal){
             if(newVal != '' || newVal != null){
                 this.notificationsCount += 1
                 // this.page = 0
                 // this.notifications = [];
                 // this.showThreeNotification()
-
-                let newNotificationsData = []
-                newNotificationsData.push(newVal)
-                this.notifications = newNotificationsData.concat(this.notifications);
+                
+                // this.notificationsData.unshift(newVal)
+                // let broadcastArray = []
+                // broadcastArray.push(newVal)
+                this.notificationsData.unshift(newVal);
                 this.reduceCount++
                 this.count -= 1
             }

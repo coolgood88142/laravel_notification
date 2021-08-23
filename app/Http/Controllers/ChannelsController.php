@@ -79,7 +79,13 @@ class ChannelsController extends Controller
                 'notificationId' => $notification->id,
                 'type' => 'addChannel'
             ];
-            $pusher->trigger('article-channel', 'App\\Events\\SendMessage', $data);
+
+            foreach($users as $user){
+                $notification = $user->notifications()->first();
+                $data['broadcast'] = $notification;
+                $pusher->trigger('article-channel' . $user->id, 'App\\Events\\SendMessage', $data);
+            }
+
             event(new RedisMessage($data));
         });
 

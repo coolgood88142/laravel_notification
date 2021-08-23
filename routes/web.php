@@ -33,15 +33,15 @@ Route::get('/articles', 'ArticlesController@showAritcles')->name('showAritcles')
 
 Route::post('/addArticles', 'ArticlesController@addArticles');
 
-Route::post('/readArticles', 'ArticlesController@readArticles');
+Route::post('/readArticles', 'ArticlesController@readArticles')->name('readArticles');
 
-Route::post('/deleteArticles', 'ArticlesController@deleteArticles');
+Route::post('/deleteArticles', 'ArticlesController@deleteArticles')->name('deleteArticles');
 
 Route::post('/saveArticles', 'ArticlesController@saveArticles');
 
 Route::post('/addComment', 'CommentController@addComment');
 
-Route::post('/showNotification', 'ArticlesController@showNotification');
+Route::post('/showNotification', 'ArticlesController@showNotification')->name('showNotification');
 
 Route::get('/testAdd', 'ArticlesController@testAdd');
 
@@ -61,9 +61,10 @@ Route::get('/addChannels', 'ChannelsController@showAddChannels');
 
 Route::post('/addChannels', 'ChannelsController@addChannels');
 
-Route::get('/showChannelContent', 'ChannelsController@showChannelContent')->name('showCannelsContent');
+Route::get('/showChannelContent', 'ChannelsController@showChannelContent')->name('showChannelContent');
 
-Route::post('/getNotificationData', 'ArticlesController@getNotificationData');
+Route::post('/getNotificationData', 'ArticlesController@getNotificationData')->name('getNotificationData');
+
 Route::get('/getNotificationData', 'ArticlesController@getNotificationData');
 
 Route::get('test', function () {

@@ -102,7 +102,7 @@ class CommentController extends Controller
 
             foreach($users as $user){
                 $notification = $user->notifications()->first();
-                $data['notification'] = $notification;
+                $data['broadcast'] = $notification;
                 $pusher->trigger('article-channel' . $user->id, 'App\\Events\\SendMessage', $data);
             }
 

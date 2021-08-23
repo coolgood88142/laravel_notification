@@ -120,6 +120,13 @@
 	//
 	//
 	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
 	// import Loading from 'vue-loading-overlay';
 	// import 'vue-loading-overlay/dist/vue-loading.css' ;
 	/* harmony default export */ __webpack_exports__["default"] = ({
@@ -127,8 +134,11 @@
 		notificationsLength: {
 		  type: Number
 		},
-		notificationData: {
+		broadcast: {
 		  type: Object
+		},
+		userId: {
+		  type: Number
 		}
 	  },
 	  // components: {
@@ -140,8 +150,11 @@
 		  'reduceCount': 0,
 		  'page': 0,
 		  'scroll': 0,
-		  'notifications': [],
-		  'notificationsCount': this.notificationsLength
+		  'notificationsData': [],
+		  'notificationsCount': this.notificationsLength,
+		  'isRead': {
+			background: 'darkgrey'
+		  }
 		};
 	  },
 	  mounted: function mounted() {
@@ -160,8 +173,8 @@
 		  axios.post(url, params).then(function (response) {
 			if (response.data.length != 0) {
 			  var dataArray = Object.values(response.data);
-			  var notificationsArray = _this.notifications;
-			  _this.notifications = notificationsArray.concat(dataArray);
+			  var notificationsArray = _this.notificationsData;
+			  _this.notificationsData = notificationsArray.concat(dataArray);
 			  _this.page++;
 			  _this.count = 3;
 			  _this.reduceCount = 0;
@@ -169,16 +182,25 @@
 		  })["catch"](function (error) {});
 		},
 		wheel: function wheel(e) {
-		  if (e.deltaY == 100) {
-			console.log(this.page);
+		  var box = e.path[2];
+		  var clientHeight = box.clientHeight;
+		  var scrollTop = box.scrollTop;
+		  var scrollHeight = box.scrollHeight;
+	
+		  if (scrollTop + clientHeight == scrollHeight) {
 			this.showThreeNotification();
-		  }
+		  } // console.log(box);
+		  // if(e.deltaY == 100){
+		  //     // console.log(this.page);
+		  //     this.showThreeNotification();
+		  // }
+	
 		},
 		showArticleContent: function showArticleContent(id, notificationId) {
 		  console.log(id);
 		  console.log(notificationId);
 		  var userId = $('#userId').val();
-		  var url = '/showArticleContent?id=' + id + '&userId=' + userId + '&isAdd=N';
+		  var url = '/showArticleContent?id=' + id + '&userId=' + userId + '&notificationId=';
 	
 		  if (notificationId != null) {
 			url = url + '&notificationId=' + notificationId;
@@ -198,15 +220,16 @@
 		}
 	  },
 	  watch: {
-		notificationData: function notificationData(newVal, oldVal) {
+		broadcast: function broadcast(newVal, oldVal) {
 		  if (newVal != '' || newVal != null) {
 			this.notificationsCount += 1; // this.page = 0
 			// this.notifications = [];
 			// this.showThreeNotification()
+			// this.notificationsData.unshift(newVal)
+			// let broadcastArray = []
+			// broadcastArray.push(newVal)
 	
-			var newNotificationsData = [];
-			newNotificationsData.push(newVal);
-			this.notifications = newNotificationsData.concat(this.notifications);
+			this.notificationsData.unshift(newVal);
 			this.reduceCount++;
 			this.count -= 1;
 		  }
@@ -914,32 +937,74 @@
 			on: { mousewheel: _vm.wheel }
 		  },
 		  [
-			_vm._l(_vm.notifications, function(notification, index) {
-			  return _c(
-				"a",
-				{
-				  key: index,
-				  staticClass: "dropdown-item",
-				  on: {
-					click: function($event) {
-					  return _vm.showArticleContent(
-						notification.data.id,
-						notification.id
-					  )
-					}
-				  }
-				},
-				[
-				  _vm._v(
-					"\n            " +
-					  _vm._s(notification.data.title) +
-					  "\n        "
-				  )
-				]
-			  )
+			_vm._l(_vm.notificationsData, function(notification, index) {
+			  return _c("div", { key: index }, [
+				notification.data.type === "deleteArticle"
+				  ? _c(
+					  "a",
+					  {
+						staticClass: "dropdown-item",
+						style: [notification.read_at !== null ? _vm.isRead : ""]
+					  },
+					  [
+						_vm._v(
+						  "\n                " +
+							_vm._s(notification.data.title) +
+							"\n            "
+						)
+					  ]
+					)
+				  : notification.data.type === "addChannel"
+				  ? _c(
+					  "a",
+					  {
+						staticClass: "dropdown-item",
+						style: [notification.read_at !== null ? _vm.isRead : ""],
+						attrs: {
+						  href:
+							"/showChannelContent?id=" +
+							notification.data.id +
+							"&userId=" +
+							_vm.userId +
+							"&notificationId=" +
+							notification.id
+						}
+					  },
+					  [
+						_vm._v(
+						  "\n                " +
+							_vm._s(notification.data.title) +
+							"\n            "
+						)
+					  ]
+					)
+				  : _c(
+					  "a",
+					  {
+						staticClass: "dropdown-item",
+						style: [notification.read_at !== null ? _vm.isRead : ""],
+						attrs: {
+						  href:
+							"/showArticleContent?id=" +
+							notification.data.id +
+							"&userId=" +
+							_vm.userId +
+							"&notificationId=" +
+							notification.id
+						}
+					  },
+					  [
+						_vm._v(
+						  "\n                " +
+							_vm._s(notification.data.title) +
+							"\n            "
+						)
+					  ]
+					)
+			  ])
 			}),
 			_vm._v(" "),
-			_vm.notifications.length == 0
+			_vm.notificationsData.length == 0
 			  ? _c("a", { staticClass: "dropdown-item" }, [
 				  _vm._v("\n            沒通知訊息\n        ")
 				])
@@ -1194,7 +1259,7 @@
 	});
 	var channel = pusher.subscribe('article-channel' + $('#userId').val());
 	channel.bind('App\\Events\\SendMessage', function (data) {
-	  app.notificationData = data.notification;
+	  app.broadcast = data.broadcast;
 	});
 	var app = new Vue({
 	  el: "#app",
@@ -1202,7 +1267,7 @@
 		"notification": _components_notification_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
 	  },
 	  data: {
-		"notificationData": null
+		"broadcast": null
 	  }
 	});
 	

@@ -107,16 +107,16 @@ class ArticlesController extends Controller
     }
 
     //已閱讀通知
-    public function readNotifications(Request $request){
-        $userId =  $request->userId;
-        $id =  $request->id;
+    public function readNotifications($id, $userId){
+        // $userId =  $request->userId;
+        // $id =  $request->id;
         $user = User::where('id', '=', $userId)->first();
         $data = $user->unreadNotifications->where('id', '=', $id)->first()->markAsRead();
     }
 
     //已閱讀全部
-    public function readNotificationsAll(Request $request){
-        $userId =  $request->userId;
+    public function readNotificationsAll($userId){
+        // $userId =  $request->userId;
         $user = User::where('id', '=', $userId)->first();
         $data = $user->unreadNotifications->markAsRead();
     }
@@ -211,8 +211,14 @@ class ArticlesController extends Controller
                     'type' => 'deleteArticle'
                 ];
 
-                $data['users'] = $users;
-                $pusher->trigger('article-channel' . $id, 'App\\Events\\SendMessage', $data);
+                // $data['users'] = $users;
+
+                foreach($users as $user){
+                    $notification = $user->notifications()->first();
+                    $data['broadcast'] = $notification;
+                    $pusher->trigger('article-channel' . $user->id, 'App\\Events\\SendMessage', $data);
+                }
+
                 event(new RedisMessage($data));
             });
         }catch(Exception $e){
@@ -223,23 +229,23 @@ class ArticlesController extends Controller
     }
 
     //通知列表-顯示全部的通知
-    public function showNotification(Request $request){
-        $page = $request->page;
+    public function showNotification(){
+        $page = 5;
         $count = $request->count;
         $reduceCount = $request->reduceCount;
 
         if($page != null && $page != ''){
             $nowCount = ($page - 1) * 3 + 1;
-            if($reduceCount != null && $reduceCount != ''){
-                $nowCount = $nowCount - $reduceCount;
-            }
+            // if($reduceCount != null && $reduceCount != ''){
+            //     $nowCount = $nowCount - $reduceCount;
+            // }
         }else{
             $nowCount = $request->nowCount;
         }
 
         $id = Auth::id();
         $user = \App\User::where('id', '=', $id)->first();
-        $newNotification = $user->notifications->skip($nowCount)->take($count);
+        $newNotification = $user->notifications->skip($nowCount);
         return $newNotification;
     }
 
