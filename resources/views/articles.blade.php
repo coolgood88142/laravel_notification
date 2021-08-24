@@ -101,7 +101,11 @@
                                 @endif
                             @else
                             @if (Auth::check())
-                                <notification :notifications-length="{{ auth()->user()->unreadNotifications->count() }}" :broadcast="broadcast" :user-id={{ $userId }}></notification> 
+                                <notification :notifications-length="{{ auth()->user()->unreadNotifications->count() }}" 
+                                    :broadcast="broadcast" 
+                                    :user-id={{ $userId }} 
+                                     >
+                                </notification> 
                             @endif
                                 <li class="nav-item dropdown">
                                     <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
@@ -253,36 +257,42 @@
 					'_token':'{{csrf_token()}}'
 				},
 				success: function(result){
-                    
+                    // console.log(getDateDiff('2021-08-21'))
                     console.log(result);
                     $.each(result, function(index, value) {
-                        // let deffDate = DateDiff("2016/5/28","2016/6/2"); 
+                        let date = new Date(value.updated_at);
+                        let diffDay = getDateDiff(date); 
 
                         let html = 
                             '<div name="notification" class="row">' +
-                                '<div class="col-7">' +
+                                '<div class="col-5">' +
                                     '<input type="button" class="list-group-item list-group-item-action" value="' + value.data.title + '"';
                                     if(value.data.type == 'addChannel'){
                                         html += ' onclick="showChannelContent('+"'"+value.data.id+"'"+', '+"'"+value.id+"'"+')">';
                                     }else{
                                         html += ' onclick="showArticleContent('+"'"+value.data.id+"'"+', '+"'"+value.id+"'"+')">';
                                     }
-                            html += '</div>' +
-                                '<div class="col-1">'
-                                    // DateDiff("2016/5/28","2016/6/2"); 
-                                    // carbon::parse ('2020-12-10')->diffInDays('2020-12-28', true);
-                                '</div>'+
-                                '<div class="col-4">';
-                                 if(value.data.type != 'deleteArticle'){
+                            html += '</div>';
+                            html += '<div class="col-2">'
+                                    if(diffDay < 7){
+                                        html += '已通知' + diffDay + '天';
+                                    }else{
+                                        html += date.getFullYear() + '-' + date.getMonth() + '-' + date.getDate();
+                                    }
+                            html += '</div>';
+                            html += '<div class="col-4">';
+
+                                if(value.data.type != 'deleteArticle'){
                                     html += '<input type="button" class="btn btn-primary" name="read" value="已閱讀"  onclick="readArticles(this, '+"'"+value.id+"'"+')"';
                                     if(value.read_at != null){
                                         html += 'disabled';
                                     }
+                                    html += '>';
                                 }
 
-                            html += '>'+
-                                '</div>'+
-                            '</div>';
+                            html +='</div>';
+
+                            html += '</div>';
                         
                         $('#notificationRaw').append(html);
                     });
@@ -360,6 +370,13 @@
 				}
 			});
 		}
+
+        function getDateDiff(sDate) {
+            var now = new Date();
+            var days = now.getTime() - sDate.getTime();
+            var day = parseInt(days / (1000 * 60 * 60 * 24));
+            return day;
+        }
 
 	</script>
 </body>

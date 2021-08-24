@@ -65,7 +65,9 @@ Route::get('/showChannelContent', 'ChannelsController@showChannelContent')->name
 
 Route::post('/getNotificationData', 'ArticlesController@getNotificationData')->name('getNotificationData');
 
-Route::get('/getNotificationData', 'ArticlesController@getNotificationData');
+Route::post('/getNotificationDataCount', 'ArticlesController@getNotificationDataCount');
+
+Route::get('/getNotificationDataCount', 'ArticlesController@getNotificationDataCount');
 
 Route::get('test', function () {
     event(new App\Events\MyEvent('hello world'));

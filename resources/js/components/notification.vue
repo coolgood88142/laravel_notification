@@ -6,7 +6,7 @@
                     {{ notificationsCount }}</span>
                 <span class="caret"></span>
         </a>
-        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown" @mousewheel="wheel" style="height: 110px; overflow-y: scroll;">
+        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown" @wheel="wheel" style="height: 100px; overflow-y: scroll;">
            
             <div v-for="(notification, index) in notificationsData" :key="index">
                 <a v-if="notification.data.type === 'deleteArticle'" class="dropdown-item" :style="[notification.read_at !== null ? isRead : '']" >
@@ -57,8 +57,9 @@ export default {
             'scroll' : 0,
             'notificationsData' : [],
             'notificationsCount' : this.notificationsLength,
-            'isRead' : {
-                background: 'darkgrey'
+            'broadcastData' : [],
+            'isRead' : { 
+                background: '#e9ecef'
             }
         }
     },
@@ -67,11 +68,23 @@ export default {
     },
     methods: {
         showThreeNotification(){
+            let sumCount = 0;
+            if(this.broadcastData.length > 0){
+                let sum = this.broadcastData.length + this.notificationsCount;
+                let sumCount = parseInt(sum / this.count);
+                if(sumCount > this.count){
+                    sumCount = sumCount - this.count;
+                }else{
+                    sumCount = this.count - sumCount;
+                }
+                
+                this.page = sumCount;
+            }
+
             let url = './showNotification'
             let params = {
                 'page' : this.page,
-                'count' : this.count,
-                'reduceCount' : this.reduceCount
+                'count' : this.count - sumCount
             }
 
             axios.post(url, params).then((response) => {
@@ -93,8 +106,8 @@ export default {
             var clientHeight = box.clientHeight 
             var scrollTop = box.scrollTop 
             var scrollHeight = box.scrollHeight 
-            if (scrollTop + clientHeight == scrollHeight) { 
-                this.showThreeNotification();
+            if (scrollTop + clientHeight == scrollHeight && e.deltaY == 100) { 
+                setInterval(this.showThreeNotification(), 1000);
             }
             // console.log(box);
             // if(e.deltaY == 100){
@@ -123,12 +136,20 @@ export default {
             }
 
             window.location.href = url;
-        }
+        },
+        getNotificationDataCount(){
+            let url = '/getNotificationDataCount';
+             axios.post(url).then((response) => {
+                this.notificationsCount =response.data;
+			}).catch((error) => {
+
+            });
+        },
     },
     watch:{
         broadcast(newVal, oldVal){
             if(newVal != '' || newVal != null){
-                this.notificationsCount += 1
+                this.getNotificationDataCount()
                 // this.page = 0
                 // this.notifications = [];
                 // this.showThreeNotification()
@@ -136,6 +157,7 @@ export default {
                 // this.notificationsData.unshift(newVal)
                 // let broadcastArray = []
                 // broadcastArray.push(newVal)
+                this.broadcastData.push(newVal)
                 this.notificationsData.unshift(newVal);
                 this.reduceCount++
                 this.count -= 1

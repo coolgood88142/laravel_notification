@@ -229,34 +229,32 @@ class ArticlesController extends Controller
     }
 
     //通知列表-顯示全部的通知
-    public function showNotification(){
-        $page = 5;
+    public function showNotification(Request $request){
+        $page = $request->page;
         $count = $request->count;
         $reduceCount = $request->reduceCount;
 
         if($page != null && $page != ''){
             $nowCount = ($page - 1) * 3 + 1;
-            // if($reduceCount != null && $reduceCount != ''){
-            //     $nowCount = $nowCount - $reduceCount;
-            // }
+            if($reduceCount != null && $reduceCount != ''){
+                $nowCount = $nowCount - $reduceCount;
+            }
         }else{
             $nowCount = $request->nowCount;
         }
 
         $id = Auth::id();
         $user = \App\User::where('id', '=', $id)->first();
-        $newNotification = $user->notifications->skip($nowCount);
+        $newNotification = $user->notifications->skip($nowCount)->take($count);
         return $newNotification;
     }
 
     public function getNotificationDataCount(Request $request){
-        $page = $request->page;
-        $count = $request->count;
-        $notificationId = $request->notificationId;
-        $notifiableId = $request->notifiable_id;
+        $id = Auth::id();
+        $user = User::where('id', '=', $id)->first();
+        $notification = $user->notifications()->count();
 
-        $user = User::where('id', '=', $notifiableId);
-        $notification = $user->notifications()->where('id', '=', $notificationId);
+        return $notification;
     }
 
     public function sendNotification(){

@@ -152,8 +152,9 @@
 		  'scroll': 0,
 		  'notificationsData': [],
 		  'notificationsCount': this.notificationsLength,
+		  'broadcastData': [],
 		  'isRead': {
-			background: 'darkgrey'
+			background: '#e9ecef'
 		  }
 		};
 	  },
@@ -164,11 +165,20 @@
 		showThreeNotification: function showThreeNotification() {
 		  var _this = this;
 	
+		  // if(this.broadcastData.length > 0){
+		  var sum = this.broadcastData.length + this.notificationsCount;
+		  sum = 13; // if(sum % this.count){
+		  // }
+	
+		  var count = parseInt(sum / this.count); // let sun = 5 - a;
+	
+		  console.log(count); // }
+	
 		  var url = './showNotification';
 		  var params = {
 			'page': this.page,
 			'count': this.count,
-			'reduceCount': this.reduceCount
+			'newCount': this.broadcastData.length + this.notificationsCount
 		  };
 		  axios.post(url, params).then(function (response) {
 			if (response.data.length != 0) {
@@ -187,8 +197,8 @@
 		  var scrollTop = box.scrollTop;
 		  var scrollHeight = box.scrollHeight;
 	
-		  if (scrollTop + clientHeight == scrollHeight) {
-			this.showThreeNotification();
+		  if (scrollTop + clientHeight == scrollHeight && e.deltaY == 100) {
+			setInterval(this.showThreeNotification(), 1000);
 		  } // console.log(box);
 		  // if(e.deltaY == 100){
 		  //     // console.log(this.page);
@@ -217,18 +227,27 @@
 		  }
 	
 		  window.location.href = url;
+		},
+		getNotificationDataCount: function getNotificationDataCount() {
+		  var _this2 = this;
+	
+		  var url = '/getNotificationDataCount';
+		  axios.post(url).then(function (response) {
+			_this2.notificationsCount = response.data;
+		  })["catch"](function (error) {});
 		}
 	  },
 	  watch: {
 		broadcast: function broadcast(newVal, oldVal) {
 		  if (newVal != '' || newVal != null) {
-			this.notificationsCount += 1; // this.page = 0
+			this.getNotificationDataCount(); // this.page = 0
 			// this.notifications = [];
 			// this.showThreeNotification()
 			// this.notificationsData.unshift(newVal)
 			// let broadcastArray = []
 			// broadcastArray.push(newVal)
 	
+			this.broadcastData.push(newVal);
 			this.notificationsData.unshift(newVal);
 			this.reduceCount++;
 			this.count -= 1;
@@ -932,9 +951,9 @@
 		  "div",
 		  {
 			staticClass: "dropdown-menu dropdown-menu-right",
-			staticStyle: { height: "110px", "overflow-y": "scroll" },
+			staticStyle: { height: "100px", "overflow-y": "scroll" },
 			attrs: { "aria-labelledby": "navbarDropdown" },
-			on: { mousewheel: _vm.wheel }
+			on: { wheel: _vm.wheel }
 		  },
 		  [
 			_vm._l(_vm.notificationsData, function(notification, index) {
