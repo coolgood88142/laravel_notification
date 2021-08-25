@@ -6,16 +6,16 @@
                     {{ notificationsCount }}</span>
                 <span class="caret"></span>
         </a>
-        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown" @wheel="wheel" style="height: 100px; overflow-y: scroll;">
+        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown" @wheel="wheel" style="height: 88px; overflow-y: scroll;">
            
             <div v-for="(notification, index) in notificationsData" :key="index">
                 <a v-if="notification.data.type === 'deleteArticle'" class="dropdown-item" :style="[notification.read_at !== null ? isRead : '']" >
                     {{ notification.data.title }}
                 </a>
-                <a v-else-if="notification.data.type === 'addChannel'" class="dropdown-item" :href="'/showChannelContent?id=' + notification.data.id +'&userId='+ userId +'&notificationId=' + notification.id " :style="[notification.read_at !== null ? isRead : '']" >
+                <a v-else-if="notification.data.type === 'addChannel'" class="dropdown-item" :href="channelUrl+'?id=' + notification.data.id +'&userId='+ userId +'&notificationId=' + notification.id " :style="[notification.read_at !== null ? isRead : '']" >
                     {{ notification.data.title }}
                 </a>
-                <a v-else class="dropdown-item" :href="'/showArticleContent?id=' + notification.data.id +'&userId='+ userId +'&notificationId=' + notification.id " :style="[notification.read_at !== null ? isRead : '']" >
+                <a v-else class="dropdown-item" :href="articleUrl+'?id=' + notification.data.id +'&userId='+ userId +'&notificationId=' + notification.id " :style="[notification.read_at !== null ? isRead : '']" >
                     {{ notification.data.title }}
                 </a>
             </div>
@@ -44,6 +44,12 @@ export default {
 		},
         userId: {
             type: Number
+        },
+        articleUrl: {
+            type: String
+        },
+        channelUrl: {
+            type: String
         }
 	},
     // components: {
@@ -52,7 +58,6 @@ export default {
     data(){
         return {
             'count': 3,
-            'reduceCount': 0,
             'page' : 0,
             'scroll' : 0,
             'notificationsData' : [],
@@ -68,23 +73,22 @@ export default {
     },
     methods: {
         showThreeNotification(){
-            let sumCount = 0;
+            //判斷有沒有通知資料
             if(this.broadcastData.length > 0){
-                let sum = this.broadcastData.length + this.notificationsCount;
-                let sumCount = parseInt(sum / this.count);
-                if(sumCount > this.count){
-                    sumCount = sumCount - this.count;
-                }else{
-                    sumCount = this.count - sumCount;
-                }
-                
-                this.page = sumCount;
+                //計算目前有多少個分頁
+                let sum = this.notificationsData.length;
+                this.page = parseInt(sum / this.count);
+
+                //計算需要新增多少個通知
+                let newCount = this.page * this.count;
+                let num = sum - newCount;
+                this.count = this.count - num;
             }
 
             let url = './showNotification'
             let params = {
                 'page' : this.page,
-                'count' : this.count - sumCount
+                'count' : this.count
             }
 
             axios.post(url, params).then((response) => {
@@ -94,7 +98,6 @@ export default {
                     this.notificationsData = notificationsArray.concat(dataArray);
                     this.page++;
                     this.count = 3;
-                    this.reduceCount = 0;
                 }
 				
 			}).catch((error) => {
@@ -159,8 +162,6 @@ export default {
                 // broadcastArray.push(newVal)
                 this.broadcastData.push(newVal)
                 this.notificationsData.unshift(newVal);
-                this.reduceCount++
-                this.count -= 1
             }
         }
     }

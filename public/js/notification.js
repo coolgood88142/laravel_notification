@@ -139,6 +139,12 @@
 		},
 		userId: {
 		  type: Number
+		},
+		articleUrl: {
+		  type: String
+		},
+		channelUrl: {
+		  type: String
 		}
 	  },
 	  // components: {
@@ -147,7 +153,6 @@
 	  data: function data() {
 		return {
 		  'count': 3,
-		  'reduceCount': 0,
 		  'page': 0,
 		  'scroll': 0,
 		  'notificationsData': [],
@@ -165,20 +170,20 @@
 		showThreeNotification: function showThreeNotification() {
 		  var _this = this;
 	
-		  // if(this.broadcastData.length > 0){
-		  var sum = this.broadcastData.length + this.notificationsCount;
-		  sum = 13; // if(sum % this.count){
-		  // }
-	
-		  var count = parseInt(sum / this.count); // let sun = 5 - a;
-	
-		  console.log(count); // }
+		  //判斷有沒有通知資料
+		  if (this.broadcastData.length > 0) {
+			//計算目前的總件數，有多少個分頁
+			var sum = this.notificationsData.length;
+			this.page = parseInt(sum / this.count);
+			var newCount = this.page * this.count;
+			var num = sum - newCount;
+			this.count = this.count - num;
+		  }
 	
 		  var url = './showNotification';
 		  var params = {
 			'page': this.page,
-			'count': this.count,
-			'newCount': this.broadcastData.length + this.notificationsCount
+			'count': this.count
 		  };
 		  axios.post(url, params).then(function (response) {
 			if (response.data.length != 0) {
@@ -187,7 +192,6 @@
 			  _this.notificationsData = notificationsArray.concat(dataArray);
 			  _this.page++;
 			  _this.count = 3;
-			  _this.reduceCount = 0;
 			}
 		  })["catch"](function (error) {});
 		},
@@ -249,8 +253,6 @@
 	
 			this.broadcastData.push(newVal);
 			this.notificationsData.unshift(newVal);
-			this.reduceCount++;
-			this.count -= 1;
 		  }
 		}
 	  }
@@ -951,7 +953,7 @@
 		  "div",
 		  {
 			staticClass: "dropdown-menu dropdown-menu-right",
-			staticStyle: { height: "100px", "overflow-y": "scroll" },
+			staticStyle: { height: "88px", "overflow-y": "scroll" },
 			attrs: { "aria-labelledby": "navbarDropdown" },
 			on: { wheel: _vm.wheel }
 		  },
@@ -981,7 +983,8 @@
 						style: [notification.read_at !== null ? _vm.isRead : ""],
 						attrs: {
 						  href:
-							"/showChannelContent?id=" +
+							_vm.channelUrl +
+							"?id=" +
 							notification.data.id +
 							"&userId=" +
 							_vm.userId +
@@ -1004,7 +1007,8 @@
 						style: [notification.read_at !== null ? _vm.isRead : ""],
 						attrs: {
 						  href:
-							"/showArticleContent?id=" +
+							_vm.articleUrl +
+							"?id=" +
 							notification.data.id +
 							"&userId=" +
 							_vm.userId +

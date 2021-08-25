@@ -104,7 +104,9 @@
                                 <notification :notifications-length="{{ auth()->user()->unreadNotifications->count() }}" 
                                     :broadcast="broadcast" 
                                     :user-id={{ $userId }} 
-                                     >
+                                    :article-url={{ json_encode(route('showArticleContent')) }}
+                                    :channel-url={{ json_encode(route('showChannelContent')) }}
+                                    >
                                 </notification> 
                             @endif
                                 <li class="nav-item dropdown">
@@ -211,27 +213,40 @@
                         '_token' : '{{csrf_token()}}'
                     },
                     success: function(result){
+                        let date = new Date(data.broadcast.updated_at);
+                        let diffDay = getDateDiff(date); 
                         let html = 
                             '<div name="notification" class="row">' +
-                                '<div class="col-8">' +
+                                '<div class="col-5">' +
                                     '<input type="button" class="list-group-item list-group-item-action text-danger" value="' + data.message + '"';
                                     if(data.userData.type == 'addChannel'){
                                         html += ' onclick="showChannelContent('+"'"+data.userData.id+"'"+', '+"'"+result.notificationId+"'"+')">';
                                     }else{
                                         html += ' onclick="showArticleContent('+"'"+data.userData.id+"'"+', '+"'"+result.notificationId+"'"+')">';
                                     }
-                                    
-                            html += '</div>' +
-                                '<div class="col-4">';
-                                 if(data.userData.type != 'deleteArticle'){
-                                    html += '<input type="button" class="btn btn-primary" name="read" value="已閱讀"  onclick="readArticles(this, '+"'"+result.notificationId+"'"+')"';
-                                    if(result.read_at != null){
-                                        html += 'disabled';
+                            html += '</div>';
+                            html += '<div class="col-2">'
+                                    if(diffDay < 7){
+                                        if(diffDay == 0){
+                                            
+                                        }else{
+                                            html += '已通知' + diffDay + '天';
+                                        }
+                                    }else{
+                                        html += date.getFullYear() + '-' + date.getMonth() + '-' + date.getDate();
                                     }
-                                }
+                            html += '</div>';
+                            html += '<div class="col-4">';
+                                    if(data.userData.type != 'deleteArticle'){
+                                        html += '<input type="button" class="btn btn-primary" name="read" value="已閱讀"  onclick="readArticles(this, '+"'"+result.notificationId+"'"+')"';
+                                        if(result.read_at != null){
+                                            html += 'disabled';
+                                        }
+                                        html += '>';
+                                    }
 
-                            html += '>'+
-                                '</div>'+
+                           
+                            html +='</div>'+
                             '</div>';
                         
                         let notification = $('#notificationRaw').html();
@@ -261,7 +276,6 @@
                     console.log(result);
                     $.each(result, function(index, value) {
                         let date = new Date(value.updated_at);
-                        let diffDay = getDateDiff(date); 
 
                         let html = 
                             '<div name="notification" class="row">' +
@@ -273,12 +287,8 @@
                                         html += ' onclick="showArticleContent('+"'"+value.data.id+"'"+', '+"'"+value.id+"'"+')">';
                                     }
                             html += '</div>';
-                            html += '<div class="col-2">'
-                                    if(diffDay < 7){
-                                        html += '已通知' + diffDay + '天';
-                                    }else{
-                                        html += date.getFullYear() + '-' + date.getMonth() + '-' + date.getDate();
-                                    }
+                            html += '<div class="col-2">';
+                            html +=  getDateDiff(date);
                             html += '</div>';
                             html += '<div class="col-4">';
 
@@ -372,9 +382,26 @@
 		}
 
         function getDateDiff(sDate) {
-            var now = new Date();
-            var days = now.getTime() - sDate.getTime();
-            var day = parseInt(days / (1000 * 60 * 60 * 24));
+            let now = new Date();
+            let days = now.getTime() - sDate.getTime();
+            let day = parseInt(days / (1000 * 60 * 60 * 24));
+
+            if(day == 0){
+                day = parseInt(days / (1000 * 60 * 60));
+                if(day == 0){
+                    day = parseInt(days / (1000 * 60));
+                    if(day == 0){
+                        day = '已通知' + parseInt(days / 1000) + '秒'
+                    }
+                    day = '已通知' + day + '分'
+                }
+                day = '已通知' + day + '時'
+            }else if(day < 7){
+                day = sDate.getFullYear() + '-' + sDate.getMonth() + '-' + sDate.getDate();
+            }else{
+                day = '已通知' + day + '天'
+            }
+
             return day;
         }
 

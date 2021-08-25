@@ -230,19 +230,17 @@ class ArticlesController extends Controller
 
     //通知列表-顯示全部的通知
     public function showNotification(Request $request){
+        //分頁、新增多少件數
         $page = $request->page;
         $count = $request->count;
-        $reduceCount = $request->reduceCount;
 
         if($page != null && $page != ''){
             $nowCount = ($page - 1) * 3 + 1;
-            if($reduceCount != null && $reduceCount != ''){
-                $nowCount = $nowCount - $reduceCount;
-            }
         }else{
             $nowCount = $request->nowCount;
         }
 
+        //計算目前的user，要顯示多少筆通知列表資料
         $id = Auth::id();
         $user = \App\User::where('id', '=', $id)->first();
         $newNotification = $user->notifications->skip($nowCount)->take($count);
