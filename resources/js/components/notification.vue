@@ -6,17 +6,22 @@
                     {{ notificationsCount }}</span>
                 <span class="caret"></span>
         </a>
-        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown" @wheel="wheel" style="height: 88px; overflow-y: scroll;">
-           
+        <div class="dropdown-menu dropdown-menu-right overflow-auto" aria-labelledby="navbarDropdown" @wheel="wheel" style="height: 110px;">
+            <div class="col">
+                <input type="button" name="readAll" value="已閱讀全部" @click="readNotification()" class="btn btn-primary">
+            </div>
             <div v-for="(notification, index) in notificationsData" :key="index">
                 <a v-if="notification.data.type === 'deleteArticle'" class="dropdown-item" :style="[notification.read_at !== null ? isRead : '']" >
                     {{ notification.data.title }}
+                    <span>{{ getDateDiff(new Date(notification.created_at)) }}</span>
                 </a>
                 <a v-else-if="notification.data.type === 'addChannel'" class="dropdown-item" :href="channelUrl+'?id=' + notification.data.id +'&userId='+ userId +'&notificationId=' + notification.id " :style="[notification.read_at !== null ? isRead : '']" >
                     {{ notification.data.title }}
+                    <span>{{ getDateDiff(new Date(notification.created_at)) }}</span>
                 </a>
                 <a v-else class="dropdown-item" :href="articleUrl+'?id=' + notification.data.id +'&userId='+ userId +'&notificationId=' + notification.id " :style="[notification.read_at !== null ? isRead : '']" >
                     {{ notification.data.title }}
+                    <span>{{ getDateDiff(new Date(notification.created_at)) }}</span>
                 </a>
             </div>
 
@@ -49,6 +54,12 @@ export default {
             type: String
         },
         channelUrl: {
+            type: String
+        },
+        getNotificationUrl: {
+            type: String
+        },
+        readUrl: {
             type: String
         }
 	},
@@ -118,36 +129,53 @@ export default {
             //     this.showThreeNotification();
             // }
         },
-        showArticleContent(id, notificationId){
-            console.log(id);
-            console.log(notificationId);
-            let userId = $('#userId').val();
-            let url = '/showArticleContent?id='+ id +'&userId='+ userId +'&notificationId=';
-            
-            if(notificationId != null){
-                url = url + '&notificationId=' + notificationId
-            }
-
-            window.location.href = url;
-        },
-        showChannelContent(id, notificationId){
-            let userId = $('#userId').val();
-            let url = '/showChannelContent?channelsId='+ id +'&userId='+ userId;
-            
-            if(notificationId != null){
-                url = url + '&notificationId=' + notificationId
-            }
-
-            window.location.href = url;
-        },
         getNotificationDataCount(){
-            let url = '/getNotificationDataCount';
+            let url = this.getNotificationUrl;
              axios.post(url).then((response) => {
-                this.notificationsCount =response.data;
+                this.notificationsCount = response.data;
 			}).catch((error) => {
 
             });
         },
+        getDateDiff(sDate) {
+            let now = new Date();
+            let days = now.getTime() - sDate.getTime();
+            let day = parseInt(days / parseInt(1000 * 60 * 60 * 24));
+
+            if(day == 0){
+                day = parseInt(days / parseInt(1000 * 60 * 60));
+                if(day == 0){
+                    day = parseInt(days / parseInt(1000 * 60));
+                    if(day == 0){
+                        return '已通知' + parseInt(days / 1000) + '秒'
+                    }
+                    return '已通知' + day + '分'
+                }
+                return '已通知' + day + '時'
+            }else if(day < 7){
+                day = '已通知' + day + '天'
+            }else{
+                day = sDate.getFullYear() + '-' + sDate.getMonth() + '-' + sDate.getDate();
+            }
+
+            return day;
+        },
+        readNotification(){
+            let url = this.readUrl;
+            let params = {
+                'id' : '',
+                'userId' : $('#userId').val()
+            }
+
+            axios.post(url, params).then((response) => {
+                if(response.data == 'success'){
+                    this.notificationsData = []
+                    this.showThreeNotification()
+                }
+			}).catch((error) => {
+
+            });
+        }
     },
     watch:{
         broadcast(newVal, oldVal){

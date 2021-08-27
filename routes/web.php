@@ -65,7 +65,7 @@ Route::get('/showChannelContent', 'ChannelsController@showChannelContent')->name
 
 Route::post('/getNotificationData', 'ArticlesController@getNotificationData')->name('getNotificationData');
 
-Route::post('/getNotificationDataCount', 'ArticlesController@getNotificationDataCount');
+Route::post('/getNotificationDataCount', 'ArticlesController@getNotificationDataCount')->name('getNotificationDataCount');
 
 Route::get('/getNotificationDataCount', 'ArticlesController@getNotificationDataCount');
 

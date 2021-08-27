@@ -127,6 +127,11 @@
 	//
 	//
 	//
+	//
+	//
+	//
+	//
+	//
 	// import Loading from 'vue-loading-overlay';
 	// import 'vue-loading-overlay/dist/vue-loading.css' ;
 	/* harmony default export */ __webpack_exports__["default"] = ({
@@ -144,6 +149,12 @@
 		  type: String
 		},
 		channelUrl: {
+		  type: String
+		},
+		getNotificationUrl: {
+		  type: String
+		},
+		readUrl: {
 		  type: String
 		}
 	  },
@@ -172,9 +183,10 @@
 	
 		  //判斷有沒有通知資料
 		  if (this.broadcastData.length > 0) {
-			//計算目前的總件數，有多少個分頁
+			//計算目前有多少個分頁
 			var sum = this.notificationsData.length;
-			this.page = parseInt(sum / this.count);
+			this.page = parseInt(sum / this.count); //計算需要新增多少個通知
+	
 			var newCount = this.page * this.count;
 			var num = sum - newCount;
 			this.count = this.count - num;
@@ -210,34 +222,55 @@
 		  // }
 	
 		},
-		showArticleContent: function showArticleContent(id, notificationId) {
-		  console.log(id);
-		  console.log(notificationId);
-		  var userId = $('#userId').val();
-		  var url = '/showArticleContent?id=' + id + '&userId=' + userId + '&notificationId=';
-	
-		  if (notificationId != null) {
-			url = url + '&notificationId=' + notificationId;
-		  }
-	
-		  window.location.href = url;
-		},
-		showChannelContent: function showChannelContent(id, notificationId) {
-		  var userId = $('#userId').val();
-		  var url = '/showChannelContent?channelsId=' + id + '&userId=' + userId;
-	
-		  if (notificationId != null) {
-			url = url + '&notificationId=' + notificationId;
-		  }
-	
-		  window.location.href = url;
-		},
 		getNotificationDataCount: function getNotificationDataCount() {
 		  var _this2 = this;
 	
-		  var url = '/getNotificationDataCount';
+		  var url = this.getNotificationUrl;
 		  axios.post(url).then(function (response) {
 			_this2.notificationsCount = response.data;
+		  })["catch"](function (error) {});
+		},
+		getDateDiff: function getDateDiff(sDate) {
+		  var now = new Date();
+		  var days = now.getTime() - sDate.getTime();
+		  var day = parseInt(days / parseInt(1000 * 60 * 60 * 24));
+	
+		  if (day == 0) {
+			day = parseInt(days / parseInt(1000 * 60 * 60));
+	
+			if (day == 0) {
+			  day = parseInt(days / parseInt(1000 * 60));
+	
+			  if (day == 0) {
+				return '已通知' + parseInt(days / 1000) + '秒';
+			  }
+	
+			  return '已通知' + day + '分';
+			}
+	
+			return '已通知' + day + '時';
+		  } else if (day < 7) {
+			day = '已通知' + day + '天';
+		  } else {
+			day = sDate.getFullYear() + '-' + sDate.getMonth() + '-' + sDate.getDate();
+		  }
+	
+		  return day;
+		},
+		readNotification: function readNotification() {
+		  var _this3 = this;
+	
+		  var url = this.readUrl;
+		  var params = {
+			'id': '',
+			'userId': $('#userId').val()
+		  };
+		  axios.post(url, params).then(function (response) {
+			if (response.data == 'success') {
+			  _this3.notificationsData = [];
+	
+			  _this3.showThreeNotification();
+			}
 		  })["catch"](function (error) {});
 		}
 	  },
@@ -952,12 +985,24 @@
 		_c(
 		  "div",
 		  {
-			staticClass: "dropdown-menu dropdown-menu-right",
-			staticStyle: { height: "88px", "overflow-y": "scroll" },
+			staticClass: "dropdown-menu dropdown-menu-right overflow-auto",
+			staticStyle: { height: "110px" },
 			attrs: { "aria-labelledby": "navbarDropdown" },
 			on: { wheel: _vm.wheel }
 		  },
 		  [
+			_c("div", { staticClass: "col" }, [
+			  _c("input", {
+				staticClass: "btn btn-primary",
+				attrs: { type: "button", name: "readAll", value: "已閱讀全部" },
+				on: {
+				  click: function($event) {
+					return _vm.readNotification()
+				  }
+				}
+			  })
+			]),
+			_vm._v(" "),
 			_vm._l(_vm.notificationsData, function(notification, index) {
 			  return _c("div", { key: index }, [
 				notification.data.type === "deleteArticle"
@@ -971,8 +1016,15 @@
 						_vm._v(
 						  "\n                " +
 							_vm._s(notification.data.title) +
-							"\n            "
-						)
+							"\n                "
+						),
+						_c("span", [
+						  _vm._v(
+							_vm._s(
+							  _vm.getDateDiff(new Date(notification.created_at))
+							)
+						  )
+						])
 					  ]
 					)
 				  : notification.data.type === "addChannel"
@@ -996,8 +1048,15 @@
 						_vm._v(
 						  "\n                " +
 							_vm._s(notification.data.title) +
-							"\n            "
-						)
+							"\n                "
+						),
+						_c("span", [
+						  _vm._v(
+							_vm._s(
+							  _vm.getDateDiff(new Date(notification.created_at))
+							)
+						  )
+						])
 					  ]
 					)
 				  : _c(
@@ -1020,8 +1079,15 @@
 						_vm._v(
 						  "\n                " +
 							_vm._s(notification.data.title) +
-							"\n            "
-						)
+							"\n                "
+						),
+						_c("span", [
+						  _vm._v(
+							_vm._s(
+							  _vm.getDateDiff(new Date(notification.created_at))
+							)
+						  )
+						])
 					  ]
 					)
 			  ])

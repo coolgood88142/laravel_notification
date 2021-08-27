@@ -101,11 +101,13 @@
                                 @endif
                             @else
                             @if (Auth::check())
-                                <notification :notifications-length="{{ auth()->user()->unreadNotifications->count() }}" 
+                                <notification :notifications-length="{{ auth()->user()->notifications->count() }}" 
                                     :broadcast="broadcast" 
                                     :user-id={{ $userId }} 
                                     :article-url={{ json_encode(route('showArticleContent')) }}
                                     :channel-url={{ json_encode(route('showChannelContent')) }}
+                                    :get-notification-url={{ json_encode(route('getNotificationDataCount')) }}
+                                    :read-url={{ json_encode(route('readArticles')) }}
                                     >
                                 </notification> 
                             @endif
@@ -384,22 +386,22 @@
         function getDateDiff(sDate) {
             let now = new Date();
             let days = now.getTime() - sDate.getTime();
-            let day = parseInt(days / (1000 * 60 * 60 * 24));
+            let day = parseInt(days / parseInt(1000 * 60 * 60 * 24));
 
             if(day == 0){
-                day = parseInt(days / (1000 * 60 * 60));
+                day = parseInt(days / parseInt(1000 * 60 * 60));
                 if(day == 0){
-                    day = parseInt(days / (1000 * 60));
+                    day = parseInt(days / parseInt(1000 * 60));
                     if(day == 0){
-                        day = '已通知' + parseInt(days / 1000) + '秒'
+                        return '已通知' + parseInt(days / 1000) + '秒'
                     }
-                    day = '已通知' + day + '分'
+                    return '已通知' + day + '分'
                 }
-                day = '已通知' + day + '時'
+                return '已通知' + day + '時'
             }else if(day < 7){
-                day = sDate.getFullYear() + '-' + sDate.getMonth() + '-' + sDate.getDate();
-            }else{
                 day = '已通知' + day + '天'
+            }else{
+                day = sDate.getFullYear() + '-' + sDate.getMonth() + '-' + sDate.getDate();
             }
 
             return day;
