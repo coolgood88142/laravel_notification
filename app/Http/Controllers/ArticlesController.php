@@ -43,6 +43,12 @@ class ArticlesController extends Controller
             'channels' => $channels,
             'userId' => $id,
             'datetime' => $datetime,
+            'urlData' => [
+                'article' => route('showArticleContent'),
+                'channel' => route('showChannelContent'),
+                'getNotification' => route('getNotificationDataCount'),
+                'read' => route('readArticles')
+            ]
         ];
 
         return view('articles', $data);

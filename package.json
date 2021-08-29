@@ -15,7 +15,7 @@
         "cross-env": "^5.2.1",
         "jquery": "^3.2",
         "laravel-echo": "^1.11.1",
-        "laravel-mix": "^6.0.25",
+        "laravel-mix": "^6.0.28",
         "lodash": "^4.17.19",
         "popper.js": "^1.12",
         "pusher-js": "^7.0.3",

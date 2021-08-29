@@ -15,11 +15,11 @@
                     {{ notification.data.title }}
                     <span>{{ getDateDiff(new Date(notification.created_at)) }}</span>
                 </a>
-                <a v-else-if="notification.data.type === 'addChannel'" class="dropdown-item" :href="channelUrl+'?id=' + notification.data.id +'&userId='+ userId +'&notificationId=' + notification.id " :style="[notification.read_at !== null ? isRead : '']" >
+                <a v-else-if="notification.data.type === 'addChannel'" class="dropdown-item" :href="urlData.channel+'?id=' + notification.data.id +'&userId='+ userId +'&notificationId=' + notification.id " :style="[notification.read_at !== null ? isRead : '']" >
                     {{ notification.data.title }}
                     <span>{{ getDateDiff(new Date(notification.created_at)) }}</span>
                 </a>
-                <a v-else class="dropdown-item" :href="articleUrl+'?id=' + notification.data.id +'&userId='+ userId +'&notificationId=' + notification.id " :style="[notification.read_at !== null ? isRead : '']" >
+                <a v-else class="dropdown-item" :href="urlData.article+'?id=' + notification.data.id +'&userId='+ userId +'&notificationId=' + notification.id " :style="[notification.read_at !== null ? isRead : '']" >
                     {{ notification.data.title }}
                     <span>{{ getDateDiff(new Date(notification.created_at)) }}</span>
                 </a>
@@ -29,9 +29,11 @@
                 更多
             </a> -->
 
-            <a class="dropdown-item" v-if="notificationsData.length == 0">
-                沒通知訊息
-            </a>
+            <div v-show="isNotification">
+                <a class="dropdown-item">
+                    無通知訊息
+                </a>
+            </div>
         </div>
     </li> 
 </template>
@@ -50,17 +52,8 @@ export default {
         userId: {
             type: Number
         },
-        articleUrl: {
-            type: String
-        },
-        channelUrl: {
-            type: String
-        },
-        getNotificationUrl: {
-            type: String
-        },
-        readUrl: {
-            type: String
+        urlData: {
+            type: Object
         }
 	},
     // components: {
@@ -76,7 +69,8 @@ export default {
             'broadcastData' : [],
             'isRead' : { 
                 background: '#e9ecef'
-            }
+            },
+            'isNotification' : false
         }
     },
     mounted(){
@@ -103,12 +97,17 @@ export default {
             }
 
             axios.post(url, params).then((response) => {
-                if(response.data.length != 0){
+                if(response.data.length != 0 && !this.isNotification){
                     let dataArray = Object.values(response.data);
                     let notificationsArray = this.notificationsData;
                     this.notificationsData = notificationsArray.concat(dataArray);
                     this.page++;
                     this.count = 3;
+
+                    //這裡是為了防範，沒通知訊息時，突然又發一則通知，要即時隱藏【無通知訊息】
+                    this.isNotification = false
+                }else{
+                    this.isNotification = true
                 }
 				
 			}).catch((error) => {
@@ -130,7 +129,7 @@ export default {
             // }
         },
         getNotificationDataCount(){
-            let url = this.getNotificationUrl;
+            let url = this.urlData.getNotification;
              axios.post(url).then((response) => {
                 this.notificationsCount = response.data;
 			}).catch((error) => {
@@ -147,13 +146,13 @@ export default {
                 if(day == 0){
                     day = parseInt(days / parseInt(1000 * 60));
                     if(day == 0){
-                        return '已通知' + parseInt(days / 1000) + '秒'
+                        return parseInt(days / 1000) + ' 秒前'
                     }
-                    return '已通知' + day + '分'
+                    return day + ' 分前'
                 }
-                return '已通知' + day + '時'
+                return day + ' 時前'
             }else if(day < 7){
-                day = '已通知' + day + '天'
+                day = day + ' 天前'
             }else{
                 day = sDate.getFullYear() + '-' + sDate.getMonth() + '-' + sDate.getDate();
             }
@@ -161,7 +160,7 @@ export default {
             return day;
         },
         readNotification(){
-            let url = this.readUrl;
+            let url = this.urlData.read;
             let params = {
                 'id' : '',
                 'userId' : $('#userId').val()

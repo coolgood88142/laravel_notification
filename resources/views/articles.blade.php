@@ -104,10 +104,7 @@
                                 <notification :notifications-length="{{ auth()->user()->notifications->count() }}" 
                                     :broadcast="broadcast" 
                                     :user-id={{ $userId }} 
-                                    :article-url={{ json_encode(route('showArticleContent')) }}
-                                    :channel-url={{ json_encode(route('showChannelContent')) }}
-                                    :get-notification-url={{ json_encode(route('getNotificationDataCount')) }}
-                                    :read-url={{ json_encode(route('readArticles')) }}
+                                    :url-data={{ json_encode($urlData) }}
                                     >
                                 </notification> 
                             @endif
@@ -393,13 +390,13 @@
                 if(day == 0){
                     day = parseInt(days / parseInt(1000 * 60));
                     if(day == 0){
-                        return '已通知' + parseInt(days / 1000) + '秒'
+                        return parseInt(days / 1000) + ' 秒前'
                     }
-                    return '已通知' + day + '分'
+                    return day + ' 分前'
                 }
-                return '已通知' + day + '時'
+                return day + ' 時前'
             }else if(day < 7){
-                day = '已通知' + day + '天'
+                day = day + ' 天前'
             }else{
                 day = sDate.getFullYear() + '-' + sDate.getMonth() + '-' + sDate.getDate();
             }

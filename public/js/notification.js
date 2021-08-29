@@ -132,6 +132,8 @@
 	//
 	//
 	//
+	//
+	//
 	// import Loading from 'vue-loading-overlay';
 	// import 'vue-loading-overlay/dist/vue-loading.css' ;
 	/* harmony default export */ __webpack_exports__["default"] = ({
@@ -145,17 +147,8 @@
 		userId: {
 		  type: Number
 		},
-		articleUrl: {
-		  type: String
-		},
-		channelUrl: {
-		  type: String
-		},
-		getNotificationUrl: {
-		  type: String
-		},
-		readUrl: {
-		  type: String
+		urlData: {
+		  type: Object
 		}
 	  },
 	  // components: {
@@ -171,7 +164,8 @@
 		  'broadcastData': [],
 		  'isRead': {
 			background: '#e9ecef'
-		  }
+		  },
+		  'isNotification': false
 		};
 	  },
 	  mounted: function mounted() {
@@ -198,12 +192,21 @@
 			'count': this.count
 		  };
 		  axios.post(url, params).then(function (response) {
-			if (response.data.length != 0) {
+			if (response.data.length != 0 && !_this.isNotification) {
 			  var dataArray = Object.values(response.data);
-			  var notificationsArray = _this.notificationsData;
-			  _this.notificationsData = notificationsArray.concat(dataArray);
-			  _this.page++;
-			  _this.count = 3;
+	
+			  if (dataArray.length != 0) {
+				var notificationsArray = _this.notificationsData;
+				_this.notificationsData = notificationsArray.concat(dataArray);
+				_this.page++;
+				_this.count = 3; //這裡是為了防範，沒通知訊息時，突然又發一則通知，要即時隱藏【無通知訊息】
+	
+				_this.isNotification = false;
+			  } else {
+				_this.isNotification = true;
+			  }
+			} else {
+			  _this.isNotification = true;
 			}
 		  })["catch"](function (error) {});
 		},
@@ -225,7 +228,7 @@
 		getNotificationDataCount: function getNotificationDataCount() {
 		  var _this2 = this;
 	
-		  var url = this.getNotificationUrl;
+		  var url = this.urlData.getNotification;
 		  axios.post(url).then(function (response) {
 			_this2.notificationsCount = response.data;
 		  })["catch"](function (error) {});
@@ -242,15 +245,15 @@
 			  day = parseInt(days / parseInt(1000 * 60));
 	
 			  if (day == 0) {
-				return '已通知' + parseInt(days / 1000) + '秒';
+				return parseInt(days / 1000) + ' 秒前';
 			  }
 	
-			  return '已通知' + day + '分';
+			  return day + ' 分前';
 			}
 	
-			return '已通知' + day + '時';
+			return day + ' 時前';
 		  } else if (day < 7) {
-			day = '已通知' + day + '天';
+			day = day + ' 天前';
 		  } else {
 			day = sDate.getFullYear() + '-' + sDate.getMonth() + '-' + sDate.getDate();
 		  }
@@ -260,7 +263,7 @@
 		readNotification: function readNotification() {
 		  var _this3 = this;
 	
-		  var url = this.readUrl;
+		  var url = this.urlData.read;
 		  var params = {
 			'id': '',
 			'userId': $('#userId').val()
@@ -1035,7 +1038,7 @@
 						style: [notification.read_at !== null ? _vm.isRead : ""],
 						attrs: {
 						  href:
-							_vm.channelUrl +
+							_vm.urlData.channel +
 							"?id=" +
 							notification.data.id +
 							"&userId=" +
@@ -1066,7 +1069,7 @@
 						style: [notification.read_at !== null ? _vm.isRead : ""],
 						attrs: {
 						  href:
-							_vm.articleUrl +
+							_vm.urlData.article +
 							"?id=" +
 							notification.data.id +
 							"&userId=" +
@@ -1093,11 +1096,24 @@
 			  ])
 			}),
 			_vm._v(" "),
-			_vm.notificationsData.length == 0
-			  ? _c("a", { staticClass: "dropdown-item" }, [
-				  _vm._v("\n            沒通知訊息\n        ")
+			_c(
+			  "div",
+			  {
+				directives: [
+				  {
+					name: "show",
+					rawName: "v-show",
+					value: _vm.isNotification,
+					expression: "isNotification"
+				  }
+				]
+			  },
+			  [
+				_c("a", { staticClass: "dropdown-item" }, [
+				  _vm._v("\n                無通知訊息\n            ")
 				])
-			  : _vm._e()
+			  ]
+			)
 		  ],
 		  2
 		)
