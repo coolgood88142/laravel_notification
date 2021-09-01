@@ -134,21 +134,49 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 // import Loading from 'vue-loading-overlay';
 // import 'vue-loading-overlay/dist/vue-loading.css' ;
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     notificationsLength: {
-      type: Number
+      type: String
     },
     broadcast: {
       type: Object
     },
     userId: {
-      type: Number
+      type: String
     },
     urlData: {
-      type: Object
+      type: Array
     }
   },
   // components: {
@@ -165,13 +193,27 @@ __webpack_require__.r(__webpack_exports__);
       'isRead': {
         background: '#e9ecef'
       },
-      'isNotification': false
+      'isNotification': false,
+      'users': [],
+      'errors': [],
+      'show': true,
+      'test': 'test'
     };
   },
   mounted: function mounted() {
-    this.showThreeNotification();
+    this.showThreeNotification(); // this.getUsers()
   },
   methods: {
+    //     getUsers () {
+    //   axios.get('https://randomuser.me/api/?results=3')
+    //     .then(response => {
+    //       console.log(JSON.stringify(response.data.results))
+    //       this.users = response.data.results
+    //     })
+    //     .catch(e => {
+    //       this.errors.push(e)
+    //     })
+    //     },
     showThreeNotification: function showThreeNotification() {
       var _this = this;
 
@@ -212,6 +254,8 @@ __webpack_require__.r(__webpack_exports__);
       var scrollHeight = box.scrollHeight;
 
       if (scrollTop + clientHeight == scrollHeight && e.deltaY == 100) {
+        _.debounce(this.showThreeNotification(), 1000);
+
         setInterval(this.showThreeNotification(), 1000);
       } // console.log(box);
       // if(e.deltaY == 100){
@@ -966,14 +1010,14 @@ var render = function() {
         }
       },
       [
-        _vm._v("\n            通知 "),
+        _vm._v("\n              通知 "),
         _c(
           "span",
           {
             staticClass: "badge badge-danger",
             attrs: { id: "count-notification" }
           },
-          [_vm._v("\n                " + _vm._s(_vm.notificationsCount))]
+          [_vm._v("\n                  " + _vm._s(_vm.notificationsCount))]
         ),
         _vm._v(" "),
         _c("span", { staticClass: "caret" })
@@ -1012,9 +1056,9 @@ var render = function() {
                   },
                   [
                     _vm._v(
-                      "\n                " +
+                      "\n                  " +
                         _vm._s(notification.data.title) +
-                        "\n                "
+                        "\n                  "
                     ),
                     _c("span", [
                       _vm._v(
@@ -1044,9 +1088,9 @@ var render = function() {
                   },
                   [
                     _vm._v(
-                      "\n                " +
+                      "\n                  " +
                         _vm._s(notification.data.title) +
-                        "\n                "
+                        "\n                  "
                     ),
                     _c("span", [
                       _vm._v(
@@ -1075,9 +1119,9 @@ var render = function() {
                   },
                   [
                     _vm._v(
-                      "\n                " +
+                      "\n                  " +
                         _vm._s(notification.data.title) +
-                        "\n                "
+                        "\n                  "
                     ),
                     _c("span", [
                       _vm._v(
@@ -1105,7 +1149,7 @@ var render = function() {
           },
           [
             _c("a", { staticClass: "dropdown-item" }, [
-              _vm._v("\n                無通知訊息\n            ")
+              _vm._v("\n                  無通知訊息\n              ")
             ])
           ]
         )
@@ -1359,7 +1403,7 @@ var pusher = new Pusher('408cd422417d5833d90d', {
 });
 var channel = pusher.subscribe('article-channel' + $('#userId').val());
 channel.bind('App\\Events\\SendMessage', function (data) {
-  app.broadcast = data.broadcast;
+  app.broadcastData = data.broadcast;
 });
 var app = new Vue({
   el: "#app",
@@ -1367,7 +1411,7 @@ var app = new Vue({
     "notification": _components_notification_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
   data: {
-    "broadcast": null
+    "broadcastData": null
   }
 });
 

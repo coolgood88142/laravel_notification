@@ -256,7 +256,7 @@ class ArticlesController extends Controller
     public function getNotificationDataCount(Request $request){
         $id = Auth::id();
         $user = User::where('id', '=', $id)->first();
-        $notification = $user->notifications()->count();
+        $notification = $user->unreadNotifications()->count();
 
         return $notification;
     }

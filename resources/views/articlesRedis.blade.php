@@ -189,8 +189,7 @@
         </div>
     </div>
     <script src="{{mix('js/app.js')}}"></script>
-	<script src="{{mix('js/edit.js')}}"></script>
-    <script src="./js/lessonNotification.js"></script>
+    <script src="{{mix('js/notification.js')}}"></script>
     <script>
         window.laravel_echo_port='{{env("LARAVEL_ECHO_PORT")}}';
     </script>

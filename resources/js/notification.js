@@ -11,7 +11,7 @@ var pusher = new Pusher('408cd422417d5833d90d', {
 
 var channel = pusher.subscribe('article-channel' + $('#userId').val());
 channel.bind('App\\Events\\SendMessage', function(data) {
-    app.broadcast = data.broadcast;
+    app.broadcastData = data.broadcast;
 });
 
 var app = new Vue({
@@ -20,6 +20,6 @@ var app = new Vue({
 		"notification": notification,
 	},
 	data:{
-		"broadcast": null
+		"broadcastData": null
 	}
 })
