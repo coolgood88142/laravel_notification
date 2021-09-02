@@ -51,6 +51,8 @@ class ArticlesController extends Controller
             ]
         ];
 
+        // dd(json_encode($data['urlData']));
+
         return view('articles', $data);
     } 
 

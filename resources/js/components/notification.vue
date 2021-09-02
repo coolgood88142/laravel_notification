@@ -7,7 +7,7 @@
                 <span class="caret"></span>
         </a>
         <div class="dropdown-menu dropdown-menu-right overflow-auto" aria-labelledby="navbarDropdown" @wheel="wheel" style="height: 110px;">
-            <div class="col">
+            <!-- <div class="col">
                 <input type="button" name="readAll" value="已閱讀全部" @click="readNotification()" class="btn btn-primary">
             </div>
             <div v-for="(notification, index) in notificationsData" :key="index">
@@ -23,10 +23,10 @@
                     {{ notification.data.title }}
                     <span>{{ getDateDiff(new Date(notification.created_at)) }}</span>
                 </a>
-            </div>
+            </div> -->
 
             
-                <!-- <div class="notification">
+                <div class="notification">
     <a v-on:click="show = !show" class="tooltip-bell">
       <i class="far fa-2x fa-bell"></i>
       <span id="circle"></span>
@@ -35,26 +35,34 @@
       <div v-if="show" class="tooltip">
         <div id="heading">
           <div class="heading-left">
-            <h6 class="heading-title">Notifications</h6>
+            <h6 class="heading-title">通知列表</h6>
           </div>
           <div class="heading-right">
-            <a class="notification-link" href="#">See all</a>
+            <a class="notification-link" @click="readNotification()" >已閱讀全部</a>
           </div>
         </div>
         <ul class="notification-list">
-          <li class="notification-item"  v-for="(user, index) in users" :key="index">
+          <li class="notification-item"  v-for="(notification, index) in notificationsData" :key="index">
             <div class="img-left">
-              <img class="user-photo" alt="User Photo" v-bind:src="user.picture.thumbnail" />
+              <!-- <img class="user-photo" alt="User Photo" v-bind:src="user.picture.thumbnail" /> -->
             </div>
-            <div class="user-content">
-              <p class="user-info"><span class="name">{{user.name.first | test}} {{user.name.last | 'test}}</span> left a comment.</p>
-              <p class="time">1 hour ago</p>
+            <div class="user-content" v-if="notification.data.type === 'deleteArticle'" :style="[notification.read_at !== null ? isRead : '']" >
+              <p class="user-info">{{ notification.data.title }}</p>
+              <p class="time">{{ getDateDiff(new Date(notification.created_at)) }}</p>
+            </div>
+            <div class="user-content" v-else-if="notification.data.type === 'addChannel'" :href="urlData.channel+'?id=' + notification.data.id +'&userId='+ userId +'&notificationId=' + notification.id " :style="[notification.read_at !== null ? isRead : '']" >
+              <p class="user-info">{{ notification.data.title }}</p>
+              <p class="time">{{ getDateDiff(new Date(notification.created_at)) }}</p>
+            </div>
+            <div class="user-content" :href="urlData.article+'?id=' + notification.data.id +'&userId='+ userId +'&notificationId=' + notification.id " :style="[notification.read_at !== null ? isRead : '']" >
+              <p class="user-info">{{ notification.data.title }}</p>
+              <p class="time">{{ getDateDiff(new Date(notification.created_at)) }}</p>
             </div>
           </li>
         </ul>
       </div>
     </transition>
-  </div> -->
+  </div>
             
 
             <div v-show="isNotification">
@@ -81,7 +89,7 @@ export default {
             type: String
         },
         urlData: {
-            type: Array
+            type: Object
         }
 	},
     // components: {
@@ -102,7 +110,8 @@ export default {
             'users': [],
             'errors': [],
             'show': true,
-            'test' : 'test'
+            'test' : 'test',
+            'url': this.urlData
 
         }
     },

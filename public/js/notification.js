@@ -162,6 +162,14 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
 // import Loading from 'vue-loading-overlay';
 // import 'vue-loading-overlay/dist/vue-loading.css' ;
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -176,7 +184,7 @@ __webpack_require__.r(__webpack_exports__);
       type: String
     },
     urlData: {
-      type: Array
+      type: Object
     }
   },
   // components: {
@@ -197,7 +205,8 @@ __webpack_require__.r(__webpack_exports__);
       'users': [],
       'errors': [],
       'show': true,
-      'test': 'test'
+      'test': 'test',
+      'url': this.urlData
     };
   },
   mounted: function mounted() {
@@ -1033,107 +1042,179 @@ var render = function() {
         on: { wheel: _vm.wheel }
       },
       [
-        _c("div", { staticClass: "col" }, [
-          _c("input", {
-            staticClass: "btn btn-primary",
-            attrs: { type: "button", name: "readAll", value: "已閱讀全部" },
-            on: {
-              click: function($event) {
-                return _vm.readNotification()
-              }
-            }
-          })
-        ]),
-        _vm._v(" "),
-        _vm._l(_vm.notificationsData, function(notification, index) {
-          return _c("div", { key: index }, [
-            notification.data.type === "deleteArticle"
-              ? _c(
-                  "a",
-                  {
-                    staticClass: "dropdown-item",
-                    style: [notification.read_at !== null ? _vm.isRead : ""]
-                  },
-                  [
-                    _vm._v(
-                      "\n                  " +
-                        _vm._s(notification.data.title) +
-                        "\n                  "
-                    ),
-                    _c("span", [
-                      _vm._v(
-                        _vm._s(
-                          _vm.getDateDiff(new Date(notification.created_at))
+        _c(
+          "div",
+          { staticClass: "notification" },
+          [
+            _c(
+              "a",
+              {
+                staticClass: "tooltip-bell",
+                on: {
+                  click: function($event) {
+                    _vm.show = !_vm.show
+                  }
+                }
+              },
+              [
+                _c("i", { staticClass: "far fa-2x fa-bell" }),
+                _vm._v(" "),
+                _c("span", { attrs: { id: "circle" } })
+              ]
+            ),
+            _vm._v(" "),
+            _c("transition", { attrs: { name: "fadeStart" } }, [
+              _vm.show
+                ? _c("div", { staticClass: "tooltip" }, [
+                    _c("div", { attrs: { id: "heading" } }, [
+                      _c("div", { staticClass: "heading-left" }, [
+                        _c("h6", { staticClass: "heading-title" }, [
+                          _vm._v("通知列表")
+                        ])
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "heading-right" }, [
+                        _c(
+                          "a",
+                          {
+                            staticClass: "notification-link",
+                            on: {
+                              click: function($event) {
+                                return _vm.readNotification()
+                              }
+                            }
+                          },
+                          [_vm._v("已閱讀全部")]
                         )
-                      )
-                    ])
-                  ]
-                )
-              : notification.data.type === "addChannel"
-              ? _c(
-                  "a",
-                  {
-                    staticClass: "dropdown-item",
-                    style: [notification.read_at !== null ? _vm.isRead : ""],
-                    attrs: {
-                      href:
-                        _vm.urlData.channel +
-                        "?id=" +
-                        notification.data.id +
-                        "&userId=" +
-                        _vm.userId +
-                        "&notificationId=" +
-                        notification.id
-                    }
-                  },
-                  [
-                    _vm._v(
-                      "\n                  " +
-                        _vm._s(notification.data.title) +
-                        "\n                  "
-                    ),
-                    _c("span", [
-                      _vm._v(
-                        _vm._s(
-                          _vm.getDateDiff(new Date(notification.created_at))
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "ul",
+                      { staticClass: "notification-list" },
+                      _vm._l(_vm.notificationsData, function(
+                        notification,
+                        index
+                      ) {
+                        return _c(
+                          "li",
+                          { key: index, staticClass: "notification-item" },
+                          [
+                            _c("div", { staticClass: "img-left" }),
+                            _vm._v(" "),
+                            notification.data.type === "deleteArticle"
+                              ? _c(
+                                  "div",
+                                  {
+                                    staticClass: "user-content",
+                                    style: [
+                                      notification.read_at !== null
+                                        ? _vm.isRead
+                                        : ""
+                                    ]
+                                  },
+                                  [
+                                    _c("p", { staticClass: "user-info" }, [
+                                      _vm._v(_vm._s(notification.data.title))
+                                    ]),
+                                    _vm._v(" "),
+                                    _c("p", { staticClass: "time" }, [
+                                      _vm._v(
+                                        _vm._s(
+                                          _vm.getDateDiff(
+                                            new Date(notification.created_at)
+                                          )
+                                        )
+                                      )
+                                    ])
+                                  ]
+                                )
+                              : notification.data.type === "addChannel"
+                              ? _c(
+                                  "div",
+                                  {
+                                    staticClass: "user-content",
+                                    style: [
+                                      notification.read_at !== null
+                                        ? _vm.isRead
+                                        : ""
+                                    ],
+                                    attrs: {
+                                      href:
+                                        _vm.urlData.channel +
+                                        "?id=" +
+                                        notification.data.id +
+                                        "&userId=" +
+                                        _vm.userId +
+                                        "&notificationId=" +
+                                        notification.id
+                                    }
+                                  },
+                                  [
+                                    _c("p", { staticClass: "user-info" }, [
+                                      _vm._v(_vm._s(notification.data.title))
+                                    ]),
+                                    _vm._v(" "),
+                                    _c("p", { staticClass: "time" }, [
+                                      _vm._v(
+                                        _vm._s(
+                                          _vm.getDateDiff(
+                                            new Date(notification.created_at)
+                                          )
+                                        )
+                                      )
+                                    ])
+                                  ]
+                                )
+                              : _vm._e(),
+                            _vm._v(" "),
+                            _c(
+                              "div",
+                              {
+                                staticClass: "user-content",
+                                style: [
+                                  notification.read_at !== null
+                                    ? _vm.isRead
+                                    : ""
+                                ],
+                                attrs: {
+                                  href:
+                                    _vm.urlData.article +
+                                    "?id=" +
+                                    notification.data.id +
+                                    "&userId=" +
+                                    _vm.userId +
+                                    "&notificationId=" +
+                                    notification.id
+                                }
+                              },
+                              [
+                                _c("p", { staticClass: "user-info" }, [
+                                  _vm._v(_vm._s(notification.data.title))
+                                ]),
+                                _vm._v(" "),
+                                _c("p", { staticClass: "time" }, [
+                                  _vm._v(
+                                    _vm._s(
+                                      _vm.getDateDiff(
+                                        new Date(notification.created_at)
+                                      )
+                                    )
+                                  )
+                                ])
+                              ]
+                            )
+                          ]
                         )
-                      )
-                    ])
-                  ]
-                )
-              : _c(
-                  "a",
-                  {
-                    staticClass: "dropdown-item",
-                    style: [notification.read_at !== null ? _vm.isRead : ""],
-                    attrs: {
-                      href:
-                        _vm.urlData.article +
-                        "?id=" +
-                        notification.data.id +
-                        "&userId=" +
-                        _vm.userId +
-                        "&notificationId=" +
-                        notification.id
-                    }
-                  },
-                  [
-                    _vm._v(
-                      "\n                  " +
-                        _vm._s(notification.data.title) +
-                        "\n                  "
-                    ),
-                    _c("span", [
-                      _vm._v(
-                        _vm._s(
-                          _vm.getDateDiff(new Date(notification.created_at))
-                        )
-                      )
-                    ])
-                  ]
-                )
-          ])
-        }),
+                      }),
+                      0
+                    )
+                  ])
+                : _vm._e()
+            ])
+          ],
+          1
+        ),
         _vm._v(" "),
         _c(
           "div",
@@ -1153,8 +1234,7 @@ var render = function() {
             ])
           ]
         )
-      ],
-      2
+      ]
     )
   ])
 }
@@ -1403,7 +1483,7 @@ var pusher = new Pusher('408cd422417d5833d90d', {
 });
 var channel = pusher.subscribe('article-channel' + $('#userId').val());
 channel.bind('App\\Events\\SendMessage', function (data) {
-  app.broadcastData = data.broadcast;
+  app.broadcast = data.broadcast;
 });
 var app = new Vue({
   el: "#app",
@@ -1411,7 +1491,7 @@ var app = new Vue({
     "notification": _components_notification_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
   data: {
-    "broadcastData": null
+    "broadcast": null
   }
 });
 
