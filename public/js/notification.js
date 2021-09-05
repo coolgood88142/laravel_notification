@@ -170,6 +170,58 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 // import Loading from 'vue-loading-overlay';
 // import 'vue-loading-overlay/dist/vue-loading.css' ;
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -183,8 +235,17 @@ __webpack_require__.r(__webpack_exports__);
     userId: {
       type: String
     },
-    urlData: {
-      type: Object
+    articleUrl: {
+      type: String
+    },
+    channelUrl: {
+      type: String
+    },
+    getNotificationUrl: {
+      type: String
+    },
+    readUrl: {
+      type: String
     }
   },
   // components: {
@@ -210,19 +271,9 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   mounted: function mounted() {
-    this.showThreeNotification(); // this.getUsers()
+    this.showThreeNotification();
   },
   methods: {
-    //     getUsers () {
-    //   axios.get('https://randomuser.me/api/?results=3')
-    //     .then(response => {
-    //       console.log(JSON.stringify(response.data.results))
-    //       this.users = response.data.results
-    //     })
-    //     .catch(e => {
-    //       this.errors.push(e)
-    //     })
-    //     },
     showThreeNotification: function showThreeNotification() {
       var _this = this;
 
@@ -257,15 +308,15 @@ __webpack_require__.r(__webpack_exports__);
       })["catch"](function (error) {});
     },
     wheel: function wheel(e) {
-      var box = e.path[2];
+      console.log(e);
+      var box = e.path[3];
       var clientHeight = box.clientHeight;
       var scrollTop = box.scrollTop;
       var scrollHeight = box.scrollHeight;
 
       if (scrollTop + clientHeight == scrollHeight && e.deltaY == 100) {
-        _.debounce(this.showThreeNotification(), 1000);
-
-        setInterval(this.showThreeNotification(), 1000);
+        this.showThreeNotification(); // _.debounce(this.showThreeNotification(), 1000);
+        // setInterval(this.showThreeNotification(), 1000);
       } // console.log(box);
       // if(e.deltaY == 100){
       //     // console.log(this.page);
@@ -276,7 +327,7 @@ __webpack_require__.r(__webpack_exports__);
     getNotificationDataCount: function getNotificationDataCount() {
       var _this2 = this;
 
-      var url = this.urlData.getNotification;
+      var url = this.getNotificationUrl;
       axios.post(url).then(function (response) {
         _this2.notificationsCount = response.data;
       })["catch"](function (error) {});
@@ -303,7 +354,13 @@ __webpack_require__.r(__webpack_exports__);
       } else if (day < 7) {
         day = day + ' 天前';
       } else {
-        day = sDate.getFullYear() + '-' + sDate.getMonth() + '-' + sDate.getDate();
+        var month = sDate.getMonth();
+
+        if (month < 10) {
+          month = "0" + month.toString();
+        }
+
+        day = sDate.getFullYear() + '-' + month + '-' + sDate.getDate();
       }
 
       return day;
@@ -311,7 +368,7 @@ __webpack_require__.r(__webpack_exports__);
     readNotification: function readNotification() {
       var _this3 = this;
 
-      var url = this.urlData.read;
+      var url = this.readUrl;
       var params = {
         'id': '',
         'userId': $('#userId').val()
@@ -323,6 +380,13 @@ __webpack_require__.r(__webpack_exports__);
           _this3.showThreeNotification();
         }
       })["catch"](function (error) {});
+    }
+  },
+  filters: {
+    capitalize: function capitalize(value) {
+      if (!value) return '';
+      value = value.toString();
+      return value.charAt(0).toUpperCase() + value.slice(1);
     }
   },
   watch: {
@@ -352,7 +416,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 
-var content = __webpack_require__(/*! !../../../css-loader??ref--6-1!../../../postcss-loader/src??ref--6-2!./bootstrap.css */ "./node_modules/css-loader/index.js?!./node_modules/postcss-loader/src/index.js?!./node_modules/bootstrap/dist/css/bootstrap.css");
+var content = __webpack_require__(/*! !../../../css-loader??ref--8-1!../../../postcss-loader/src??ref--8-2!./bootstrap.css */ "./node_modules/css-loader/index.js?!./node_modules/postcss-loader/src/index.js?!./node_modules/bootstrap/dist/css/bootstrap.css");
 
 if(typeof content === 'string') content = [[module.i, content, '']];
 
@@ -376,7 +440,7 @@ if(false) {}
 
 /***/ "./node_modules/css-loader/index.js?!./node_modules/postcss-loader/src/index.js?!./node_modules/bootstrap/dist/css/bootstrap.css":
 /*!***************************************************************************************************************************************!*\
-  !*** ./node_modules/css-loader??ref--6-1!./node_modules/postcss-loader/src??ref--6-2!./node_modules/bootstrap/dist/css/bootstrap.css ***!
+  !*** ./node_modules/css-loader??ref--8-1!./node_modules/postcss-loader/src??ref--8-2!./node_modules/bootstrap/dist/css/bootstrap.css ***!
   \***************************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
@@ -1006,235 +1070,164 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c("li", { staticClass: "nav-item dropdown" }, [
     _c(
-      "a",
-      {
-        staticClass: "nav-link dropdown-toggle",
-        attrs: {
-          id: "navbarDropdown",
-          href: "#",
-          role: "button",
-          "data-toggle": "dropdown",
-          "aria-haspopup": "true",
-          "aria-expanded": "false"
-        }
-      },
-      [
-        _vm._v("\n              通知 "),
-        _c(
-          "span",
-          {
-            staticClass: "badge badge-danger",
-            attrs: { id: "count-notification" }
-          },
-          [_vm._v("\n                  " + _vm._s(_vm.notificationsCount))]
-        ),
-        _vm._v(" "),
-        _c("span", { staticClass: "caret" })
-      ]
-    ),
-    _vm._v(" "),
-    _c(
       "div",
-      {
-        staticClass: "dropdown-menu dropdown-menu-right overflow-auto",
-        staticStyle: { height: "110px" },
-        attrs: { "aria-labelledby": "navbarDropdown" },
-        on: { wheel: _vm.wheel }
-      },
+      { staticClass: "notification" },
       [
         _c(
-          "div",
-          { staticClass: "notification" },
-          [
-            _c(
-              "a",
-              {
-                staticClass: "tooltip-bell",
-                on: {
-                  click: function($event) {
-                    _vm.show = !_vm.show
-                  }
-                }
-              },
-              [
-                _c("i", { staticClass: "far fa-2x fa-bell" }),
-                _vm._v(" "),
-                _c("span", { attrs: { id: "circle" } })
-              ]
-            ),
-            _vm._v(" "),
-            _c("transition", { attrs: { name: "fadeStart" } }, [
-              _vm.show
-                ? _c("div", { staticClass: "tooltip" }, [
-                    _c("div", { attrs: { id: "heading" } }, [
-                      _c("div", { staticClass: "heading-left" }, [
-                        _c("h6", { staticClass: "heading-title" }, [
-                          _vm._v("通知列表")
-                        ])
-                      ]),
-                      _vm._v(" "),
-                      _c("div", { staticClass: "heading-right" }, [
-                        _c(
-                          "a",
-                          {
-                            staticClass: "notification-link",
-                            on: {
-                              click: function($event) {
-                                return _vm.readNotification()
-                              }
-                            }
-                          },
-                          [_vm._v("已閱讀全部")]
-                        )
-                      ])
-                    ]),
-                    _vm._v(" "),
-                    _c(
-                      "ul",
-                      { staticClass: "notification-list" },
-                      _vm._l(_vm.notificationsData, function(
-                        notification,
-                        index
-                      ) {
-                        return _c(
-                          "li",
-                          { key: index, staticClass: "notification-item" },
-                          [
-                            _c("div", { staticClass: "img-left" }),
-                            _vm._v(" "),
-                            notification.data.type === "deleteArticle"
-                              ? _c(
-                                  "div",
-                                  {
-                                    staticClass: "user-content",
-                                    style: [
-                                      notification.read_at !== null
-                                        ? _vm.isRead
-                                        : ""
-                                    ]
-                                  },
-                                  [
-                                    _c("p", { staticClass: "user-info" }, [
-                                      _vm._v(_vm._s(notification.data.title))
-                                    ]),
-                                    _vm._v(" "),
-                                    _c("p", { staticClass: "time" }, [
-                                      _vm._v(
-                                        _vm._s(
-                                          _vm.getDateDiff(
-                                            new Date(notification.created_at)
-                                          )
-                                        )
-                                      )
-                                    ])
-                                  ]
-                                )
-                              : notification.data.type === "addChannel"
-                              ? _c(
-                                  "div",
-                                  {
-                                    staticClass: "user-content",
-                                    style: [
-                                      notification.read_at !== null
-                                        ? _vm.isRead
-                                        : ""
-                                    ],
-                                    attrs: {
-                                      href:
-                                        _vm.urlData.channel +
-                                        "?id=" +
-                                        notification.data.id +
-                                        "&userId=" +
-                                        _vm.userId +
-                                        "&notificationId=" +
-                                        notification.id
-                                    }
-                                  },
-                                  [
-                                    _c("p", { staticClass: "user-info" }, [
-                                      _vm._v(_vm._s(notification.data.title))
-                                    ]),
-                                    _vm._v(" "),
-                                    _c("p", { staticClass: "time" }, [
-                                      _vm._v(
-                                        _vm._s(
-                                          _vm.getDateDiff(
-                                            new Date(notification.created_at)
-                                          )
-                                        )
-                                      )
-                                    ])
-                                  ]
-                                )
-                              : _vm._e(),
-                            _vm._v(" "),
-                            _c(
-                              "div",
-                              {
-                                staticClass: "user-content",
-                                style: [
-                                  notification.read_at !== null
-                                    ? _vm.isRead
-                                    : ""
-                                ],
-                                attrs: {
-                                  href:
-                                    _vm.urlData.article +
-                                    "?id=" +
-                                    notification.data.id +
-                                    "&userId=" +
-                                    _vm.userId +
-                                    "&notificationId=" +
-                                    notification.id
-                                }
-                              },
-                              [
-                                _c("p", { staticClass: "user-info" }, [
-                                  _vm._v(_vm._s(notification.data.title))
-                                ]),
-                                _vm._v(" "),
-                                _c("p", { staticClass: "time" }, [
-                                  _vm._v(
-                                    _vm._s(
-                                      _vm.getDateDiff(
-                                        new Date(notification.created_at)
-                                      )
-                                    )
-                                  )
-                                ])
-                              ]
-                            )
-                          ]
-                        )
-                      }),
-                      0
-                    )
-                  ])
-                : _vm._e()
-            ])
-          ],
-          1
-        ),
-        _vm._v(" "),
-        _c(
-          "div",
+          "a",
           {
-            directives: [
-              {
-                name: "show",
-                rawName: "v-show",
-                value: _vm.isNotification,
-                expression: "isNotification"
+            staticClass: "tooltip-bell",
+            on: {
+              click: function($event) {
+                _vm.show = !_vm.show
               }
-            ]
+            }
           },
           [
-            _c("a", { staticClass: "dropdown-item" }, [
-              _vm._v("\n                  無通知訊息\n              ")
+            _c("i", { staticClass: "far fa-2x fa-bell" }),
+            _vm._v(" "),
+            _c("span", { attrs: { id: "circle" } }, [
+              _vm._v(_vm._s(this.notificationsCount))
             ])
           ]
-        )
-      ]
+        ),
+        _vm._v(" "),
+        _c("transition", { attrs: { name: "fadeStart" } }, [
+          !_vm.show
+            ? _c("div", { staticClass: "tooltip" }, [
+                _c("div", { attrs: { id: "heading" } }, [
+                  _c("div", { staticClass: "heading-left" }, [
+                    _c("h6", { staticClass: "heading-title" }, [
+                      _vm._v("通知列表")
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "heading-right" }, [
+                    _c(
+                      "a",
+                      {
+                        staticClass: "notification-link",
+                        attrs: { href: "http://127.0.0.1:8000/articles" },
+                        on: {
+                          click: function($event) {
+                            $event.preventDefault()
+                            return _vm.readNotification()
+                          }
+                        }
+                      },
+                      [_vm._v("已閱讀全部")]
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c(
+                  "ul",
+                  {
+                    staticClass: "notification-list",
+                    staticStyle: {
+                      height: "240px",
+                      width: "369px",
+                      overflow: "scroll !important"
+                    },
+                    on: { wheel: _vm.wheel }
+                  },
+                  _vm._l(_vm.notificationsData, function(notification, index) {
+                    return _c(
+                      "li",
+                      {
+                        key: index,
+                        staticClass: "notification-item",
+                        style: [notification.read_at !== null ? _vm.isRead : ""]
+                      },
+                      [
+                        _c("div", { staticClass: "img-left" }, [
+                          _c("img", {
+                            staticClass: "user-photo",
+                            attrs: {
+                              alt: "User Photo",
+                              src:
+                                "https://randomuser.me/api/portraits/thumb/women/6.jpg"
+                            }
+                          })
+                        ]),
+                        _vm._v(" "),
+                        _c("div", { staticClass: "user-content" }, [
+                          notification.data.type === "deleteArticle"
+                            ? _c("a", { staticClass: "user-info" }, [
+                                _vm._v(
+                                  "\n                                      " +
+                                    _vm._s(notification.data.title) +
+                                    "\n                                  "
+                                )
+                              ])
+                            : notification.data.type === "addChannel"
+                            ? _c(
+                                "a",
+                                {
+                                  staticClass: "user-info",
+                                  attrs: {
+                                    href:
+                                      _vm.channelUrl +
+                                      "?id=" +
+                                      notification.data.id +
+                                      "&userId=" +
+                                      _vm.userId +
+                                      "&notificationId=" +
+                                      notification.id
+                                  }
+                                },
+                                [
+                                  _vm._v(
+                                    "\n                                       " +
+                                      _vm._s(notification.data.title) +
+                                      "\n                                  "
+                                  )
+                                ]
+                              )
+                            : _c(
+                                "a",
+                                {
+                                  staticClass: "user-info",
+                                  attrs: {
+                                    href:
+                                      _vm.articleUrl +
+                                      "?id=" +
+                                      notification.data.id +
+                                      "&userId=" +
+                                      _vm.userId +
+                                      "&notificationId=" +
+                                      notification.id
+                                  }
+                                },
+                                [
+                                  _vm._v(
+                                    "\n                                       " +
+                                      _vm._s(notification.data.title) +
+                                      "\n                                  "
+                                  )
+                                ]
+                              ),
+                          _vm._v(" "),
+                          _c("p", { staticClass: "time" }, [
+                            _vm._v(
+                              _vm._s(
+                                _vm.getDateDiff(
+                                  new Date(notification.created_at)
+                                )
+                              )
+                            )
+                          ])
+                        ])
+                      ]
+                    )
+                  }),
+                  0
+                )
+              ])
+            : _vm._e()
+        ])
+      ],
+      1
     )
   ])
 }

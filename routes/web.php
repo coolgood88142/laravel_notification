@@ -92,3 +92,8 @@ Route::get('/redis', function () {
 });
 
 Route::get('/articlesRedis', 'ArticlesController@showAritclesRedis');
+
+
+Route::get('/testVue', function () {
+    return view('testVue');
+});

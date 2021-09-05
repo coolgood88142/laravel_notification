@@ -1,13 +1,65 @@
 <template>
     <li class="nav-item dropdown">
-        <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" 
+        <!-- <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" 
             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 通知 <span class="badge badge-danger" id="count-notification">
                     {{ notificationsCount }}</span>
                 <span class="caret"></span>
-        </a>
-        <div class="dropdown-menu dropdown-menu-right overflow-auto" aria-labelledby="navbarDropdown" @wheel="wheel" style="height: 110px;">
-            <!-- <div class="col">
+        </a> -->
+        <div class="notification">
+            <a v-on:click="show = !show" class="tooltip-bell">
+                <i class="far fa-2x fa-bell"></i>
+                <span id="circle">{{ this.notificationsCount }}</span>
+            </a>
+            <transition name="fadeStart" v-cloak>
+                <div v-if="!show" class="tooltip">
+                    <div id="heading">
+                            <div class="heading-left">
+                                <h6 class="heading-title">通知列表</h6>
+                            </div>
+                            <div class="heading-right">
+                                <a class="notification-link" href="http://127.0.0.1:8000/articles" v-on:click.prevent="readNotification()">已閱讀全部</a>
+                            </div>
+                        </div>
+                        <ul class="notification-list" @wheel="wheel" style="height: 240px; width:369px; overflow: scroll !important; ">
+                            <li class="notification-item" v-for="(notification, index) in notificationsData" :key="index" 
+                                            :style="[notification.read_at !== null ? isRead : '']">
+                                <div class="img-left">
+                                    <img alt="User Photo" src="https://randomuser.me/api/portraits/thumb/women/6.jpg" class="user-photo">
+                                </div>
+                                <div class="user-content">
+                                    <a v-if="notification.data.type === 'deleteArticle'" class="user-info">
+                                        {{ notification.data.title }}
+                                    </a>
+                                    <a v-else-if="notification.data.type === 'addChannel'" 
+                                        :href="channelUrl+'?id=' + notification.data.id +'&userId='+ userId +'&notificationId=' + notification.id " class="user-info">
+                                         {{ notification.data.title }}
+                                    </a>
+                                    <a v-else :href="articleUrl+'?id=' + notification.data.id +'&userId='+ userId +'&notificationId=' + notification.id " class="user-info">
+                                         {{ notification.data.title }}
+                                    </a>
+                                    <!-- <input type="button" style="width:205px;" :value="notification.data.title" onclick="showArticleContent('27', '8d6c0595-a86a-4ead-b9e1-57e5bd0df5fa')" class="list-group-item "> -->
+                                    <p class="time">{{ getDateDiff(new Date(notification.created_at)) }}</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+            </transition>
+        </div>
+        <!-- <div class="dropdown-menu dropdown-menu-right overflow-auto" aria-labelledby="navbarDropdown" @wheel="wheel" style="height: 110px;">
+            <div class="tooltip">
+                <div id="heading">
+                    <div class="heading-left">
+                        <h6 class="heading-title">通知列表</h6>
+                    </div>
+                    <div class="heading-right">
+                        <a class="notification-link" href="#" onClick="readNotification()">已閱讀全部</a>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+        <!-- <div class="dropdown-menu dropdown-menu-right overflow-auto" aria-labelledby="navbarDropdown" @wheel="wheel" style="height: 110px;">
+            <div class="col">
                 <input type="button" name="readAll" value="已閱讀全部" @click="readNotification()" class="btn btn-primary">
             </div>
             <div v-for="(notification, index) in notificationsData" :key="index">
@@ -15,18 +67,18 @@
                     {{ notification.data.title }}
                     <span>{{ getDateDiff(new Date(notification.created_at)) }}</span>
                 </a>
-                <a v-else-if="notification.data.type === 'addChannel'" class="dropdown-item" :href="urlData.channel+'?id=' + notification.data.id +'&userId='+ userId +'&notificationId=' + notification.id " :style="[notification.read_at !== null ? isRead : '']" >
+                <a v-else-if="notification.data.type === 'addChannel'" class="dropdown-item" :href="channelUrl+'?id=' + notification.data.id +'&userId='+ userId +'&notificationId=' + notification.id " :style="[notification.read_at !== null ? isRead : '']" >
                     {{ notification.data.title }}
                     <span>{{ getDateDiff(new Date(notification.created_at)) }}</span>
                 </a>
-                <a v-else class="dropdown-item" :href="urlData.article+'?id=' + notification.data.id +'&userId='+ userId +'&notificationId=' + notification.id " :style="[notification.read_at !== null ? isRead : '']" >
+                <a v-else class="dropdown-item" :href="articleUrl+'?id=' + notification.data.id +'&userId='+ userId +'&notificationId=' + notification.id " :style="[notification.read_at !== null ? isRead : '']" >
                     {{ notification.data.title }}
                     <span>{{ getDateDiff(new Date(notification.created_at)) }}</span>
                 </a>
             </div> -->
 
             
-                <div class="notification">
+                <!-- <div class="notification">
     <a v-on:click="show = !show" class="tooltip-bell">
       <i class="far fa-2x fa-bell"></i>
       <span id="circle"></span>
@@ -44,7 +96,7 @@
         <ul class="notification-list">
           <li class="notification-item"  v-for="(notification, index) in notificationsData" :key="index">
             <div class="img-left">
-              <!-- <img class="user-photo" alt="User Photo" v-bind:src="user.picture.thumbnail" /> -->
+              <img class="user-photo" alt="User Photo" v-bind:src="user.picture.thumbnail" />
             </div>
             <div class="user-content" v-if="notification.data.type === 'deleteArticle'" :style="[notification.read_at !== null ? isRead : '']" >
               <p class="user-info">{{ notification.data.title }}</p>
@@ -62,15 +114,15 @@
         </ul>
       </div>
     </transition>
-  </div>
+  </div> -->
             
 
-            <div v-show="isNotification">
+            <!-- <div v-show="isNotification">
                 <a class="dropdown-item">
                     無通知訊息
                 </a>
             </div>
-        </div>
+        </div> -->
     </li> 
 </template>
 <script>
@@ -88,8 +140,17 @@ export default {
         userId: {
             type: String
         },
-        urlData: {
-            type: Object
+        articleUrl: {
+            type: String
+        },
+        channelUrl: {
+            type: String
+        },
+        getNotificationUrl: {
+            type: String
+        },
+        readUrl: {
+            type: String
         }
 	},
     // components: {
@@ -117,19 +178,8 @@ export default {
     },
     mounted(){
         this.showThreeNotification()
-        // this.getUsers()
     },
     methods: {
-    //     getUsers () {
-    //   axios.get('https://randomuser.me/api/?results=3')
-    //     .then(response => {
-    //       console.log(JSON.stringify(response.data.results))
-    //       this.users = response.data.results
-    //     })
-    //     .catch(e => {
-    //       this.errors.push(e)
-    //     })
-    //     },
         showThreeNotification(){
             //判斷有沒有通知資料
             if(this.broadcastData.length > 0){
@@ -168,13 +218,15 @@ export default {
             });
         },
         wheel(e){
-            let box = e.path[2];
+            console.log(e)
+            let box = e.path[3];
             var clientHeight = box.clientHeight 
             var scrollTop = box.scrollTop 
             var scrollHeight = box.scrollHeight 
             if (scrollTop + clientHeight == scrollHeight && e.deltaY == 100) { 
-                _.debounce(this.showThreeNotification(), 1000);
-                setInterval(this.showThreeNotification(), 1000);
+                this.showThreeNotification();
+                // _.debounce(this.showThreeNotification(), 1000);
+                // setInterval(this.showThreeNotification(), 1000);
             }
             // console.log(box);
             // if(e.deltaY == 100){
@@ -183,7 +235,7 @@ export default {
             // }
         },
         getNotificationDataCount(){
-            let url = this.urlData.getNotification;
+            let url = this.getNotificationUrl;
              axios.post(url).then((response) => {
                 this.notificationsCount = response.data;
 			}).catch((error) => {
@@ -208,13 +260,18 @@ export default {
             }else if(day < 7){
                 day = day + ' 天前'
             }else{
-                day = sDate.getFullYear() + '-' + sDate.getMonth() + '-' + sDate.getDate();
+                let month = sDate.getMonth();
+                if(month < 10){
+                    month = "0" + month.toString();
+                }
+
+                day = sDate.getFullYear() + '-' + month + '-' + sDate.getDate();
             }
 
             return day;
         },
         readNotification(){
-            let url = this.urlData.read;
+            let url = this.readUrl;
             let params = {
                 'id' : '',
                 'userId' : $('#userId').val()
@@ -230,6 +287,13 @@ export default {
             });
         }
     },
+     filters: {
+    capitalize: function (value) {
+      if (!value) return ''
+      value = value.toString()
+      return value.charAt(0).toUpperCase() + value.slice(1)
+    }
+  },
     watch:{
         broadcast(newVal, oldVal){
             if(newVal != '' || newVal != null){
